@@ -42,27 +42,27 @@ export default function ProjectsSection() {
   ];
 
   return (
-    <section id="projects" className="section bg-secondary relative overflow-hidden">
+    <section id="projects" className="section bg-secondary relative overflow-hidden px-4 md:px-6 lg:px-8">
       {/* Enhanced background effects */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-primary/5 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-accent-purple/5 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-1/4 left-1/4 w-[300px] sm:w-[400px] md:w-[500px] h-[300px] sm:h-[400px] md:h-[500px] bg-accent-primary/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] sm:w-[400px] md:w-[600px] h-[300px] sm:h-[400px] md:h-[600px] bg-accent-purple/5 rounded-full blur-3xl animate-float-delayed"></div>
       </div>
       
       <div className="container relative z-10">
-        <div className="text-center mb-12 animate-slide-up-fade">
-          <h2 className="section-title inline-block relative group">
+        <div className="text-center mb-8 md:mb-10 lg:mb-12 animate-slide-up-fade">
+          <h2 className="section-title inline-block relative group text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             Production-Ready Architecture
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-accent-primary via-purple-500 to-pink-500 group-hover:w-full transition-all duration-700 shadow-[0_0_20px_rgba(0,229,255,0.6)]"></div>
           </h2>
-          <p className="text-text-secondary mt-4 text-lg max-w-2xl mx-auto">Enterprise-grade solutions with scalable architecture and clean code practices</p>
+          <p className="text-text-secondary mt-4 text-base sm:text-lg max-w-2xl mx-auto px-2">Enterprise-grade solutions with scalable architecture and clean code practices</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
           {projects.map((project, index) => (
             <div 
               key={index} 
-              className="glass-panel group transition-all duration-[600ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-3 hover:shadow-glow flex flex-col rounded-xl overflow-hidden relative border border-color hover:border-accent-primary/40 animate-scale-in hover-lift tech-border"
+              className="glass-panel group transition-all duration-[600ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-2 md:hover:-translate-y-3 hover:shadow-glow flex flex-col rounded-xl overflow-hidden relative border border-color hover:border-accent-primary/40 animate-scale-in hover-lift tech-border"
               style={{ animationDelay: `${index * 150}ms` }}
             >
               {/* Enhanced holographic scan line effect */}
@@ -74,66 +74,66 @@ export default function ProjectsSection() {
               {/* Corner glow */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-bl-3xl pointer-events-none"></div>
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.2)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="bg-secondary/50 border-b border-color px-4 py-3 flex items-center relative group-hover:bg-secondary/70 transition-all duration-500">
-                <div className="flex gap-2.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400/20 border border-red-400/50 group-hover:bg-red-400/40 group-hover:border-red-400/80 transition-all duration-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-amber-400/20 border border-amber-400/50 group-hover:bg-amber-400/40 group-hover:border-amber-400/80 transition-all duration-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-emerald-400/20 border border-emerald-400/50 group-hover:bg-emerald-400/40 group-hover:border-emerald-400/80 transition-all duration-500"></div>
+              <div className="bg-secondary/50 border-b border-color px-3 sm:px-4 py-2.5 sm:py-3 flex items-center relative group-hover:bg-secondary/70 transition-all duration-500">
+                <div className="flex gap-2 sm:gap-2.5">
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400/20 border border-red-400/50 group-hover:bg-red-400/40 group-hover:border-red-400/80 transition-all duration-500"></div>
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-400/20 border border-amber-400/50 group-hover:bg-amber-400/40 group-hover:border-amber-400/80 transition-all duration-500"></div>
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-400/20 border border-emerald-400/50 group-hover:bg-emerald-400/40 group-hover:border-emerald-400/80 transition-all duration-500"></div>
                 </div>
-                <div className="absolute inset-x-0 text-center text-xs font-mono text-text-tertiary pointer-events-none">
+                <div className="absolute inset-x-0 text-center text-[10px] sm:text-xs font-mono text-text-tertiary pointer-events-none">
                   {project.title.split(' ')[0].toLowerCase()}.sh
                 </div>
-                <div className="ml-auto flex items-center gap-3">
+                <div className="ml-auto flex items-center gap-2 sm:gap-3">
                    <a href={project.githubLink} target="_blank" rel="noreferrer" className="text-text-secondary hover:text-accent-primary hover:scale-125 transition-all duration-300">
-                     <Github size={16} />
+                     <Github size={14} className="sm:size-16" />
                    </a>
                    <a href={project.githubLink} target="_blank" rel="noreferrer" className="text-text-secondary hover:text-accent-primary hover:scale-125 hover:rotate-12 transition-all duration-300">
-                     <ExternalLink size={16} />
+                     <ExternalLink size={14} className="sm:size-16" />
                    </a>
                 </div>
               </div>
-              <div className="p-6 flex-1 flex flex-col relative bg-main/40">
+              <div className="p-4 sm:p-5 md:p-6 flex-1 flex flex-col relative bg-main/40">
                 
-                <h3 className="text-xl font-bold mb-5 relative z-10 flex items-start gap-4 text-text-primary group-hover:text-accent-primary transition-colors duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
-                  <span className="mt-0.5 p-2 rounded-lg bg-bg-main/50 border border-color shrink-0 group-hover:border-accent-primary/30 group-hover:bg-accent-primary/5 group-hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] group-hover:rotate-6 transition-all duration-500 relative overflow-hidden">
+                <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-5 relative z-10 flex items-start gap-3 sm:gap-4 text-text-primary group-hover:text-accent-primary transition-colors duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
+                  <span className="mt-0.5 p-1.5 sm:p-2 rounded-lg bg-bg-main/50 border border-color shrink-0 group-hover:border-accent-primary/30 group-hover:bg-accent-primary/5 group-hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] group-hover:rotate-6 transition-all duration-500 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-accent-primary/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <span className="relative z-10">{project.icon}</span>
                   </span>
-                  <span className="group-hover:translate-x-2 transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] leading-tight">{project.title}</span>
+                  <span className="group-hover:translate-x-2 transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] leading-tight text-sm sm:text-base md:text-lg">{project.title}</span>
                 </h3>
                 
-                <div className="mb-5 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-75 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
-                  <span className="text-[0.65rem] font-bold text-accent-primary/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-accent-primary animate-pulse"></span>
+                <div className="mb-4 sm:mb-5 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-75 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
+                  <span className="text-[0.6rem] sm:text-[0.65rem] font-bold text-accent-primary/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent-primary animate-pulse"></span>
                     Problem Overview
                   </span>
-                  <p className="text-[0.9rem] text-text-secondary leading-relaxed">{project.problem}</p>
+                  <p className="text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] text-text-secondary leading-relaxed">{project.problem}</p>
                 </div>
                 
-                <div className="mb-5 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-100 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
-                  <span className="text-[0.65rem] font-bold text-accent-purple/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-accent-purple animate-pulse"></span>
+                <div className="mb-4 sm:mb-5 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-100 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
+                  <span className="text-[0.6rem] sm:text-[0.65rem] font-bold text-accent-purple/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent-purple animate-pulse"></span>
                     Architecture
                   </span>
-                  <div className="bg-bg-main border border-color rounded-lg p-3.5 text-[0.85rem] font-mono text-text-secondary/90 group-hover:border-accent-purple/20 group-hover:bg-accent-purple/5 transition-all duration-500 leading-relaxed shadow-inner relative overflow-hidden">
+                  <div className="bg-bg-main border border-color rounded-lg p-2.5 sm:p-3 md:p-3.5 text-[0.75rem] sm:text-[0.8rem] md:text-[0.85rem] font-mono text-text-secondary/90 group-hover:border-accent-purple/20 group-hover:bg-accent-purple/5 transition-all duration-500 leading-relaxed shadow-inner relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-accent-purple/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <span className="relative z-10">{project.architecture}</span>
                   </div>
                 </div>
                 
-                <div className="mb-8 flex-1 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-150 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
-                  <span className="text-[0.65rem] font-bold text-accent-green/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
+                <div className="mb-6 sm:mb-8 flex-1 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-150 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
+                  <span className="text-[0.6rem] sm:text-[0.65rem] font-bold text-accent-green/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent-green animate-pulse"></span>
                     Deployment Strategy
                   </span>
-                  <p className="text-[0.9rem] text-text-secondary leading-relaxed">{project.deployment}</p>
+                  <p className="text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] text-text-secondary leading-relaxed">{project.deployment}</p>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 mt-auto pt-5 border-t border-color relative z-10">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-auto pt-4 sm:pt-5 border-t border-color relative z-10">
                   {project.techStack.map((tech, idx) => (
                     <span 
                       key={idx} 
-                      className="text-[0.7rem] font-bold tracking-wide uppercase bg-bg-tertiary text-text-secondary px-3 py-1.5 rounded border border-color hover:scale-110 group-hover:border-accent-primary/30 group-hover:bg-accent-primary/5 group-hover:text-accent-primary transition-all duration-500 cursor-default flex items-center gap-1.5 shadow-sm hover:shadow-md relative overflow-hidden"
+                      className="text-[0.65rem] sm:text-[0.7rem] font-bold tracking-wide uppercase bg-bg-tertiary text-text-secondary px-2 sm:px-3 py-1 sm:py-1.5 rounded border border-color hover:scale-110 group-hover:border-accent-primary/30 group-hover:bg-accent-primary/5 group-hover:text-accent-primary transition-all duration-500 cursor-default flex items-center gap-1.5 shadow-sm hover:shadow-md relative overflow-hidden"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-accent-primary/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                       <span className="w-1.5 h-1.5 rounded-full bg-accent-primary/60 group-hover:bg-accent-primary group-hover:animate-pulse relative z-10"></span>
@@ -146,9 +146,9 @@ export default function ProjectsSection() {
           ))}
         </div>
         
-        <div className="mt-12 text-center animate-scale-in">
-           <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="btn btn-outline inline-flex items-center gap-2 hover-lift hover-glow group">
-             View Complete GitHub Profile <Github size={16} className="group-hover:rotate-12 group-hover:scale-110 transition-all duration-300" />
+        <div className="mt-8 md:mt-10 lg:mt-12 text-center animate-scale-in px-4">
+           <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="btn btn-outline inline-flex items-center gap-2 hover-lift hover-glow group text-sm sm:text-base">
+             View Complete GitHub Profile <Github size={14} className="sm:size-16 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300" />
            </a>
         </div>
       </div>

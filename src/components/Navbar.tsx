@@ -39,12 +39,12 @@ export default function Navbar() {
 
   return (
     <header className={`navbar ${scrolled ? 'navbar-scrolled py-2' : 'py-4'}`} style={{ transition: 'all 0.3s ease' }}>
-      <div className="container nav-container relative z-50">
+      <div className="container nav-container relative z-50 px-4 md:px-6 lg:px-8">
         <a href="#" className="nav-logo hover:scale-105 transition-transform duration-300 group">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-accent-primary font-bold text-2xl tracking-tight drop-shadow-[0_0_10px_rgba(236,72,153,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(236,72,153,0.6)] transition-all duration-300 inline-block">&lt;LP /&gt;</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-accent-primary font-bold text-xl sm:text-2xl tracking-tight drop-shadow-[0_0_10px_rgba(236,72,153,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(236,72,153,0.6)] transition-all duration-300 inline-block">&lt;LP /&gt;</span>
         </a>
 
-        <nav className="desktop-nav">
+        <nav className="desktop-nav hidden md:block">
           <ul className="nav-links">
             {navItems.map((item) => (
               <li key={item.id}>
@@ -52,7 +52,7 @@ export default function Navbar() {
                   href={`#${item.id}`} 
                   className={`relative px-2 py-1 transition-all duration-300 group ${activeSection === item.id ? 'text-accent-primary font-semibold' : 'text-text-secondary hover:text-text-primary'}`}
                 >
-                  <span className="capitalize">{item.label}</span>
+                  <span className="capitalize text-sm lg:text-base">{item.label}</span>
                   {activeSection === item.id && (
                     <span className="absolute bottom-0 left-0 w-full h-[2px] bg-accent-primary rounded-full shadow-[0_0_8px_rgba(0,229,255,0.8)] animate-pulse"></span>
                   )}
@@ -62,45 +62,45 @@ export default function Navbar() {
             ))}
           </ul>
           
-          <div className="nav-socials gap-3">
+          <div className="nav-socials gap-2 lg:gap-3">
             <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="social-icon hover:scale-110 hover:rotate-12 transition-all duration-300">
-              <Github size={18} />
+              <Github size={16} className="lg:size-18" />
             </a>
             <a href="https://www.linkedin.com/in/lalit-punjabi-443911312/" target="_blank" rel="noreferrer" className="social-icon hover:scale-110 hover:-rotate-12 transition-all duration-300">
-              <Linkedin size={18} />
+              <Linkedin size={16} className="lg:size-18" />
             </a>
-            <a href="#contact" className="btn btn-primary btn-sm hover-lift hover-glow">Contact Me</a>
+            <a href="#contact" className="btn btn-primary btn-sm hover-lift hover-glow text-xs lg:text-sm">Contact Me</a>
           </div>
         </nav>
 
         <button 
-          className="mobile-menu-btn hover:scale-110 transition-transform duration-300"
+          className="mobile-menu-btn hover:scale-110 transition-transform duration-300 md:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {mobileMenuOpen ? <X size={20} className="sm:size-24" /> : <Menu size={20} className="sm:size-24" />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="mobile-menu animate-slide-down-fade backdrop-blur-xl bg-bg-main/95">
-          <nav>
-            <ul className="mobile-nav-links">
+        <div className="mobile-menu animate-slide-down-fade backdrop-blur-xl bg-bg-main/95 absolute top-full left-0 w-full border-t border-color shadow-lg md:hidden">
+          <nav className="px-4 py-6">
+            <ul className="mobile-nav-links space-y-4">
               {['About', 'Education', 'Tech Stack', 'Projects', 'Certifications'].map((item, idx) => (
                 <li key={idx} className="group">
-                  <a href={`#${item.toLowerCase().replace(' ', '-')}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 group-hover:translate-x-2 transition-all duration-300">
+                  <a href={`#${item.toLowerCase().replace(' ', '-')}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 group-hover:translate-x-2 transition-all duration-300 text-text-secondary hover:text-text-primary">
                     <span className="w-0 h-[2px] bg-gradient-to-r from-accent-primary to-purple-400 group-hover:w-4 transition-all duration-300"></span>
                     {item}
                   </a>
                 </li>
               ))}
             </ul>
-            <div className="mobile-nav-socials flex justify-center gap-4 mb-6">
-              <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="hover:scale-125 hover:text-accent-primary transition-all duration-300"><Github size={24} /></a>
-              <a href="https://www.linkedin.com/in/lalit-punjabi-443911312/" target="_blank" rel="noreferrer" className="hover:scale-125 hover:text-accent-primary transition-all duration-300"><Linkedin size={24} /></a>
+            <div className="mobile-nav-socials flex justify-center gap-4 mb-6 mt-6">
+              <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="hover:scale-125 hover:text-accent-primary transition-all duration-300"><Github size={20} /></a>
+              <a href="https://www.linkedin.com/in/lalit-punjabi-443911312/" target="_blank" rel="noreferrer" className="hover:scale-125 hover:text-accent-primary transition-all duration-300"><Linkedin size={20} /></a>
             </div>
-            <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="btn btn-primary btn-block hover-lift hover-glow">Contact Me</a>
+            <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="btn btn-primary btn-block hover-lift hover-glow w-full">Contact Me</a>
           </nav>
         </div>
       )}

@@ -60,34 +60,34 @@ export default function CertificationsSection() {
   ];
 
   return (
-    <section id="certifications" className="section relative overflow-hidden">
+    <section id="certifications" className="section relative overflow-hidden px-4 md:px-6 lg:px-8">
       {/* Background effects */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-green/5 rounded-full blur-3xl pointer-events-none animate-float"></div>
+      <div className="absolute top-0 right-0 w-[300px] sm:w-[400px] md:w-[500px] h-[300px] sm:h-[400px] md:h-[500px] bg-accent-green/5 rounded-full blur-3xl pointer-events-none animate-float"></div>
       
       <div className="container relative z-10">
-        <h2 className="section-title animate-slide-up-fade">Certifications</h2>
+        <h2 className="section-title animate-slide-up-fade text-2xl sm:text-3xl md:text-4xl lg:text-5xl">Certifications</h2>
         
-        <div className="grid grid-cols-2 gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           {certifications.map((cert, index) => (
             <a 
               href={cert.link} 
               target="_blank" 
               rel="noreferrer" 
               key={index} 
-              className="cert-card p-6 rounded-xl flex items-start gap-4 transition-all hover:shadow-glow group glass-panel relative overflow-hidden cursor-pointer hover-lift hover:border-accent-primary/40 animate-scale-in"
+              className="cert-card p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl flex items-start gap-3 sm:gap-4 transition-all hover:shadow-glow group glass-panel relative overflow-hidden cursor-pointer hover-lift hover:border-accent-primary/40 animate-scale-in"
               style={{ animationDelay: `${index * 80}ms` }}
             >
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.2)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="bg-bg-tertiary p-3 rounded-xl border border-color relative z-10 group-hover:border-accent-primary/40 group-hover:bg-accent-primary/10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm group-hover:shadow-[0_0_20px_rgba(0,229,255,0.2)]">
+              <div className="bg-bg-tertiary p-2.5 sm:p-3 rounded-lg sm:rounded-xl border border-color relative z-10 group-hover:border-accent-primary/40 group-hover:bg-accent-primary/10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm group-hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] shrink-0">
                 {cloneElement(cert.icon, { 
                   className: 'text-accent-primary group-hover:text-accent-purple group-hover:animate-pulse transition-all duration-500',
-                  size: 32
+                  size: 28
                 })}
               </div>
-              <div className="relative z-10 flex-1">
-                <h3 className="text-[1.05rem] leading-snug font-semibold mb-2 group-hover:text-accent-primary transition-colors text-text-primary group-hover:translate-x-1 transform duration-300">{cert.title}</h3>
-                <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <span className="font-medium text-text-secondary/80 bg-bg-secondary px-3 py-1 rounded-full border border-color group-hover:border-accent-primary/30 group-hover:bg-accent-primary/10 transition-all duration-300">{cert.issuer}</span>
+              <div className="relative z-10 flex-1 min-w-0">
+                <h3 className="text-sm sm:text-base md:text-[1.05rem] leading-snug font-semibold mb-2 group-hover:text-accent-primary transition-colors text-text-primary group-hover:translate-x-1 transform duration-300 line-clamp-2">{cert.title}</h3>
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-text-secondary">
+                  <span className="font-medium text-text-secondary/80 bg-bg-secondary px-2.5 sm:px-3 py-1 rounded-full border border-color group-hover:border-accent-primary/30 group-hover:bg-accent-primary/10 transition-all duration-300 truncate max-w-full">{cert.issuer}</span>
                 </div>
               </div>
             </a>

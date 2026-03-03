@@ -6,6 +6,7 @@ import TechStackSection from './components/TechStackSection';
 import ProjectsSection from './components/ProjectsSection';
 import CertificationsSection from './components/CertificationsSection';
 import ExperienceSection from './components/ExperienceSection';
+import StatsSection from './components/StatsSection';
 import ContactSection from './components/ContactSection';
 import FooterSection from './components/FooterSection';
 import ParticleBackground from './components/ParticleBackground';
@@ -26,6 +27,7 @@ function App() {
         <ProjectsSection />
         <CertificationsSection />
         <ExperienceSection />
+        <StatsSection />
         <ContactSection />
       </main>
       <FooterSection />

@@ -47,34 +47,35 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="section bg-main border-t border-color pb-24 relative overflow-hidden">
+    <section id="contact" className="section bg-main border-t border-color pb-24 relative overflow-hidden px-4 md:px-6 lg:px-8">
       {/* Background Effects */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-primary/5 rounded-full blur-3xl pointer-events-none animate-float"></div>
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent-purple/5 rounded-full blur-3xl pointer-events-none animate-float-delayed"></div>
+      <div className="absolute top-0 right-0 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-accent-primary/5 rounded-full blur-3xl pointer-events-none animate-float"></div>
+      <div className="absolute bottom-0 left-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-accent-purple/5 rounded-full blur-3xl pointer-events-none animate-float-delayed"></div>
       
       <div className="container relative z-10">
         
         <div className="text-center mb-16 animate-slide-up-fade">
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-accent-primary/30 bg-accent-primary/10 text-sm font-mono mb-6 shadow-[0_0_20px_rgba(0,229,255,0.15)] animate-glow-pulse tech-border">
+          <div className="inline-flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-accent-primary/30 bg-accent-primary/10 text-xs sm:text-sm font-mono mb-6 shadow-[0_0_20px_rgba(0,229,255,0.15)] animate-glow-pulse tech-border">
              <span className="text-accent animate-pulse">&gt;_</span>
-             <span className="text-accent ml-2 font-semibold">contact_sequence.init()</span>
+             <span className="text-accent ml-2 font-semibold hidden xs:inline">contact_sequence.init()</span>
+             <span className="text-accent ml-2 font-semibold xs:hidden">contact</span>
           </div>
-          <h2 className="text-5xl md:text-6xl font-bold animate-slide-up-fade delay-100 mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold animate-slide-up-fade delay-100 mb-4">
             Get In <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-primary via-purple-400 to-pink-500 drop-shadow-[0_0_25px_rgba(0,242,254,0.4)] animate-glow-pulse">Touch</span>
           </h2>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-accent-primary to-purple-500 mx-auto rounded-full shadow-[0_0_15px_rgba(0,229,255,0.6)]"></div>
+          <div className="w-20 sm:w-24 h-1.5 bg-gradient-to-r from-accent-primary to-purple-500 mx-auto rounded-full shadow-[0_0_15px_rgba(0,229,255,0.6)]"></div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           
           {/* Left Column - Premium Contact Cards */}
-          <div className="space-y-6 animate-slide-up-fade delay-200">
-            <div className="text-left mb-8">
-              <h3 className="text-3xl font-bold text-text-primary mb-3 flex items-center gap-3">
-                <span className="w-2 h-8 bg-gradient-to-b from-accent-primary to-purple-500 rounded-full shadow-[0_0_15px_rgba(0,229,255,0.6)]"></span>
+          <div className="space-y-4 md:space-y-6 animate-slide-up-fade delay-200">
+            <div className="text-left mb-6 md:mb-8">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-primary mb-3 flex items-center gap-3">
+                <span className="w-1.5 sm:w-2 h-6 sm:h-8 bg-gradient-to-b from-accent-primary to-purple-500 rounded-full shadow-[0_0_15px_rgba(0,229,255,0.6)]"></span>
                 Let's Connect
               </h3>
-              <p className="text-secondary text-lg leading-relaxed max-w-md hover:text-text-primary transition-all duration-300 pl-5 border-l-2 border-accent-primary/20">
+              <p className="text-secondary text-base sm:text-lg leading-relaxed max-w-full hover:text-text-primary transition-all duration-300 pl-4 sm:pl-5 border-l-2 border-accent-primary/20">
                 Ready to build something amazing together? Let's discuss your next DevOps or Cloud project!
               </p>
             </div>
