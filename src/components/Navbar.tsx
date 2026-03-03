@@ -29,6 +29,14 @@ export default function Navbar() {
     };
   }, []);
 
+  const navItems = [
+    { id: 'about', label: 'About' },
+    { id: 'education', label: 'Education' },
+    { id: 'tech-stack', label: 'Tech Stack' },
+    { id: 'projects', label: 'Projects' },
+    { id: 'certifications', label: 'Certifications' },
+  ];
+
   return (
     <header className={`navbar ${scrolled ? 'navbar-scrolled py-2' : 'py-4'}`} style={{ transition: 'all 0.3s ease' }}>
       <div className="container nav-container">
@@ -38,14 +46,14 @@ export default function Navbar() {
 
         <nav className="desktop-nav">
           <ul className="nav-links">
-            {['About', 'Education', 'Tech-Stack', 'Projects', 'Certifications'].map((item) => (
-              <li key={item}>
+            {navItems.map((item) => (
+              <li key={item.id}>
                 <a 
-                  href={`#${item}`} 
-                  className={`relative px-2 py-1 transition-colors duration-300 ${activeSection === item ? 'text-accent-primary font-semibold' : 'text-text-secondary hover:text-text-primary'}`}
+                  href={`#${item.id}`} 
+                  className={`relative px-2 py-1 transition-colors duration-300 ${activeSection === item.id ? 'text-accent-primary font-semibold' : 'text-text-secondary hover:text-text-primary'}`}
                 >
-                  <span className="capitalize">{item.replace('-', ' ')}</span>
-                  {activeSection === item && (
+                  <span className="capitalize">{item.label}</span>
+                  {activeSection === item.id && (
                     <span className="absolute bottom-0 left-0 w-full h-[2px] bg-accent-primary rounded-full shadow-[0_0_8px_rgba(0,229,255,0.8)] animate-pulse"></span>
                   )}
                 </a>
