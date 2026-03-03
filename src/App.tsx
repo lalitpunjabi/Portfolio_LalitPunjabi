@@ -8,10 +8,15 @@ import CertificationsSection from './components/CertificationsSection';
 import ExperienceSection from './components/ExperienceSection';
 import ContactSection from './components/ContactSection';
 import FooterSection from './components/FooterSection';
+import ParticleBackground from './components/ParticleBackground';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
-    <div className="app-container">
+    <div className="app-container relative">
+      {/* Global Particle Background */}
+      <ParticleBackground />
+      
       <Navbar />
       <main>
         <HeroSection />
@@ -24,6 +29,9 @@ function App() {
         <ContactSection />
       </main>
       <FooterSection />
+      
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </div>
   );
 }

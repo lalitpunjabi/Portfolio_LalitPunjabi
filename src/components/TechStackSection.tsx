@@ -40,24 +40,51 @@ export default function TechStackSection() {
   ];
 
   return (
-    <section id="tech-stack" className="section">
-      <div className="container">
-        <h2 className="section-title">Technical Arsenal</h2>
+    <section id="tech-stack" className="section relative overflow-hidden">
+      {/* Enhanced background decoration */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-primary/5 rounded-full blur-3xl pointer-events-none animate-float"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent-purple/5 rounded-full blur-3xl pointer-events-none animate-float-delayed"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-accent-primary/5 to-purple-500/5 rounded-full blur-3xl pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-1000"></div>
+      
+      <div className="container relative z-10">
+        <div className="text-center mb-12 animate-slide-up-fade">
+          <h2 className="section-title inline-block relative group">
+            Technical Arsenal
+            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-accent-primary via-purple-500 to-pink-500 group-hover:w-full transition-all duration-700 shadow-[0_0_20px_rgba(0,229,255,0.6)]"></div>
+          </h2>
+          <p className="text-text-secondary mt-4 text-lg max-w-2xl mx-auto">Comprehensive toolkit for building scalable cloud infrastructure</p>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category, index) => (
-            <div key={index} className="glass-panel p-6 rounded-xl relative overflow-hidden group hover:border-color transition-all duration-500">
-              <div className={`absolute inset-0 bg-gradient-to-br ${category.bgFade}/5 to-transparent pointer-events-none z-0 group-hover:opacity-100 opacity-50 transition-opacity duration-500`}></div>
+            <div 
+              key={index} 
+              className="glass-panel p-6 rounded-xl relative overflow-hidden group hover-lift hover:border-accent-primary/40 transition-all duration-500 animate-scale-in hover:shadow-glow tech-border"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              {/* Enhanced gradient overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${category.bgFade}/10 via-${category.bgFade}/5 to-transparent pointer-events-none z-0 opacity-50 group-hover:opacity-100 transition-opacity duration-500`}></div>
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none z-0"></div>
+              {/* Corner accent */}
+              <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl ${category.bgFade}/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-bl-3xl z-0`}></div>
               
-              <h3 className="text-[1.05rem] font-bold mb-5 border-b border-color pb-3 relative z-10 text-text-primary flex items-center gap-3">
-                <span className={`${category.color} opacity-80 group-hover:opacity-100 transition-opacity`}>{category.icon}</span> 
+              <h3 className="text-[1.05rem] font-bold mb-5 border-b border-color pb-3 relative z-10 text-text-primary flex items-center gap-3 group-hover:border-accent-primary/40 transition-all duration-500">
+                <span className={`${category.color} opacity-80 group-hover:opacity-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 drop-shadow-[0_0_8px_currentColor]`}>
+                  {category.icon}
+                </span> 
                 {category.title}
               </h3>
               
               <div className="flex flex-wrap gap-2.5 relative z-10">
                 {category.items.map((item, idx) => (
-                  <span key={idx} className="flex items-center px-3 py-1.5 bg-bg-main/60 border border-color rounded-md text-[0.8rem] tracking-wide font-medium text-text-secondary transition-all duration-300 hover:scale-[1.03] hover:text-text-primary hover:border-color hover:bg-bg-tertiary cursor-default shadow-sm">
-                    {item}
+                  <span 
+                    key={idx} 
+                    className="group/chip flex items-center px-3 py-1.5 bg-bg-main/60 border border-color rounded-md text-[0.8rem] tracking-wide font-medium text-text-secondary transition-all duration-300 hover:scale-105 hover:text-text-primary hover:border-accent-primary/50 hover:bg-accent-primary/10 hover:shadow-[0_0_15px_rgba(0,229,255,0.2)] cursor-default relative overflow-hidden"
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-r ${category.bgFade}/5 to-transparent opacity-0 group-hover/chip:opacity-100 transition-opacity duration-300`}></div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent-primary/40 mr-2 group-hover/chip:bg-accent-primary group-hover/chip:animate-pulse relative z-10"></span>
+                    <span className="relative z-10">{item}</span>
                   </span>
                 ))}
               </div>
