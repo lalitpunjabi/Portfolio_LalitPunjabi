@@ -35,34 +35,7 @@ export default function AboutSection() {
           </div>
         </div>
 
-        <div className="flex justify-center mb-16">
-          <div className="about-content max-w-3xl w-full">
-            <h3 className="text-xl mb-6 font-semibold text-gradient-accent text-center">Personal Details</h3>
-            
-            <ul className="space-y-4">
-              <li className="flex items-start gap-4 p-4 rounded-xl transition-all hover:bg-bg-tertiary border border-transparent hover:border-color">
-                <span className="text-accent-primary mt-1 text-2xl">📅</span>
-                <p className="text-text-secondary text-lg mt-0.5"><strong className="text-text-primary font-medium">DOB:</strong> 04/09/2004</p>
-              </li>
-              <li className="flex items-start gap-4 p-4 rounded-xl transition-all hover:bg-bg-tertiary border border-transparent hover:border-color">
-                <span className="text-accent-primary mt-1 text-2xl">🌍</span>
-                <p className="text-text-secondary text-lg mt-0.5"><strong className="text-text-primary font-medium">Nationality:</strong> Indian</p>
-              </li>
-              <li className="flex items-start gap-4 p-4 rounded-xl transition-all hover:bg-bg-tertiary border border-transparent hover:border-color">
-                <span className="text-accent-primary mt-1 text-2xl">🗣️</span>
-                <p className="text-text-secondary text-lg mt-0.5"><strong className="text-text-primary font-medium">Languages:</strong> English, Hindi, Sindhi</p>
-              </li>
-              <li className="flex items-start gap-4 p-4 rounded-xl transition-all hover:bg-bg-tertiary border border-transparent hover:border-color">
-                <span className="text-accent-primary mt-1 text-2xl">⚽</span>
-                <p className="text-text-secondary text-lg mt-0.5"><strong className="text-text-primary font-medium">Hobbies:</strong> Gym Workouts, Football</p>
-              </li>
-              <li className="flex items-start gap-4 p-4 rounded-xl transition-all hover:bg-bg-tertiary border border-transparent hover:border-color">
-                <span className="text-accent-primary mt-1 text-2xl">📍</span>
-                <p className="text-text-secondary text-lg mt-0.5"><strong className="text-text-primary font-medium">Address:</strong> A-109 Samta Nagar Bikaner Rajasthan</p>
-              </li>
-            </ul>
-          </div>
-        </div>
+
       </div>
     </section>
   );

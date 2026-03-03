@@ -7,7 +7,7 @@ export default function ExperienceSection() {
         <h2 className="section-title">Leadership & Experience</h2>
         
         <div className="flex flex-col gap-8">
-          <div className="experience-card bg-main p-8 border border-color rounded-lg relative overflow-hidden transition-all hover:shadow-md hover:border-accent">
+          <div className="glass-panel p-8 rounded-xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 rounded-bl-[100px] z-0 pointer-events-none"></div>
             
             <div className="relative z-10">
@@ -38,7 +38,7 @@ export default function ExperienceSection() {
             </div>
           </div>
 
-          <div className="experience-card bg-main p-8 border border-color rounded-lg relative overflow-hidden transition-all hover:shadow-md hover:border-accent">
+          <div className="glass-panel p-8 rounded-xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 rounded-bl-[100px] z-0 pointer-events-none"></div>
             
             <div className="relative z-10">

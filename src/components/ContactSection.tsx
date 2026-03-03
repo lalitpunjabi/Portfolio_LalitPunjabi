@@ -1,4 +1,4 @@
-import { Mail, MapPin, Linkedin, Github, Send } from 'lucide-react';
+import { Mail, MapPin, Linkedin, Github } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ContactSection() {
@@ -26,7 +26,7 @@ export default function ContactSection() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-10 lg:gap-16 gap-12 items-start">
           
           {/* Left Column - Contact Info */}
           <div className="space-y-8 animate-slide-right">
@@ -75,54 +75,69 @@ export default function ContactSection() {
 
           {/* Right Column - Terminal Form */}
           <div className="animate-slide-left opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
-            <div className="glass-panel rounded-2xl overflow-hidden shadow-card transition-shadow duration-500 hover:shadow-glow bg-bg-secondary/40 backdrop-blur-xl border border-color">
-              <div className="px-4 py-3 bg-bg-tertiary/50 border-b border-color flex items-center relative">
+            <div className="rounded-xl overflow-hidden shadow-terminal bg-[#0B1120] border border-[#1E293B] group">
+              {/* Mac Terminal Header */}
+              <div className="px-4 py-3 bg-[#111827] border-b border-[#1E293B] flex items-center relative">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-400/30 border border-red-400/50"></div>
-                  <div className="w-3 h-3 rounded-full bg-amber-400/30 border border-amber-400/50"></div>
-                  <div className="w-3 h-3 rounded-full bg-emerald-400/30 border border-emerald-400/50"></div>
+                  <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]"></div>
+                  <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]"></div>
+                  <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]"></div>
                 </div>
-                <div className="absolute inset-x-0 text-center text-xs font-mono text-text-tertiary pointer-events-none">send-message.sh</div>
+                <div className="absolute inset-x-0 text-center text-xs font-mono text-gray-400 pointer-events-none">
+                  bash -- ~
+                </div>
               </div>
               
-              <div className="p-6 md:p-8 bg-bg-main/30">
+              <div className="p-6 md:p-8">
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
+                    <div className="flex items-center mb-1">
+                      <span className="text-emerald-400 font-mono text-sm mr-2">$</span>
+                      <span className="text-gray-400 font-mono text-xs">enter_name</span>
+                    </div>
                     <input 
                       type="text" 
                       placeholder="Your Name" 
                       required
-                      className="w-full bg-bg-secondary/40 border border-color rounded-xl px-4 py-3.5 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-primary/50 focus:bg-bg-tertiary transition-all"
+                      className="w-full bg-[#111827] border border-[#1E293B] rounded-lg px-4 py-3.5 text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-accent-primary/60 focus:bg-[#1A2234] focus:shadow-[0_0_15px_rgba(0,229,255,0.1)] transition-all font-mono text-sm"
                     />
                   </div>
                   <div>
+                    <div className="flex items-center mb-1">
+                      <span className="text-emerald-400 font-mono text-sm mr-2">$</span>
+                      <span className="text-gray-400 font-mono text-xs">enter_email</span>
+                    </div>
                     <input 
                       type="email" 
                       placeholder="Your Email" 
                       required
-                      className="w-full bg-bg-secondary/40 border border-color rounded-xl px-4 py-3.5 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-primary/50 focus:bg-bg-tertiary transition-all"
+                      className="w-full bg-[#111827] border border-[#1E293B] rounded-lg px-4 py-3.5 text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-accent-primary/60 focus:bg-[#1A2234] focus:shadow-[0_0_15px_rgba(0,229,255,0.1)] transition-all font-mono text-sm"
                     />
                   </div>
                   <div>
+                    <div className="flex items-center mb-1">
+                      <span className="text-emerald-400 font-mono text-sm mr-2">$</span>
+                      <span className="text-gray-400 font-mono text-xs">compose_message</span>
+                    </div>
                     <textarea 
-                      placeholder="Your Message" 
+                      placeholder="Your Message..." 
                       required
                       rows={4}
-                      className="w-full bg-bg-secondary/40 border border-color rounded-xl px-4 py-3.5 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-primary/50 focus:bg-bg-tertiary transition-all resize-none"
+                      className="w-full bg-[#111827] border border-[#1E293B] rounded-lg px-4 py-3.5 text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-accent-primary/60 focus:bg-[#1A2234] focus:shadow-[0_0_15px_rgba(0,229,255,0.1)] transition-all resize-none font-mono text-sm"
                     ></textarea>
                   </div>
                   <button 
                     type="submit" 
                     disabled={formStatus !== 'idle'}
-                    className={`w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${
+                    className={`w-full py-3.5 mt-2 rounded-lg font-mono text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${
                       formStatus === 'sent' 
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
-                        : 'btn-primary'
+                        ? 'bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                        : 'bg-accent-primary/10 text-accent-primary border border-accent-primary/30 hover:bg-accent-primary/20 hover:shadow-[0_0_20px_rgba(0,229,255,0.2)]'
                     }`}
                   >
-                    {formStatus === 'idle' && <><Send size={18} /> Send Message</>}
-                    {formStatus === 'sending' && <span className="animate-pulse">Transmitting...</span>}
-                    {formStatus === 'sent' && <span>Delivery Confirmed</span>}
+                    {formStatus === 'idle' && <><span className="text-lg">./</span>send_message.sh</>}
+                    {formStatus === 'sending' && <span className="animate-pulse">Executing...</span>}
+                    {formStatus === 'sent' && <span>Delivery Confirmed [OK]</span>}
                   </button>
                 </form>
               </div>
