@@ -4,7 +4,7 @@ export default function TechStackSection() {
   const categories = [
     {
       title: 'Containerization & Automation',
-      items: ['Docker', 'Ansible'],
+      items: ['Kubernetes', 'Docker', 'Ansible'],
       icon: <Server size={20} />,
       color: 'text-accent-primary',
       bgFade: 'from-accent-primary'
@@ -32,7 +32,7 @@ export default function TechStackSection() {
     },
     {
       title: 'Developer Tools',
-      items: ['VM Workstation', 'Git & GitHub', 'Visual Studio Code', 'Eclipse', 'MySQL'],
+      items: ['VM Workstation', 'Git & GitHub', 'GitLab', 'Visual Studio Code', 'Eclipse', 'MySQL'],
       icon: <Wrench size={20} />,
       color: 'text-amber-400',
       bgFade: 'from-amber-400'

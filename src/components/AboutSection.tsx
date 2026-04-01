@@ -23,7 +23,7 @@ export default function AboutSection() {
             {/* Add left border accent */}
             <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-accent-primary via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <p>
-              I am a B.Tech student specializing in Artificial Intelligence & Data Science (CGPA: 9.32) 
+              I am a B.Tech student specializing in Artificial Intelligence & Data Science (CGPA: 9.42) 
               with a strong passion for building scalable, automated, and resilient infrastructure. 
               Methodical in planning, dependable in execution, and structured in approach, I consistently 
               deliver well-engineered solutions across impact-driven real-world projects.

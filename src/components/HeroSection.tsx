@@ -52,7 +52,7 @@ export default function HeroSection() {
             </a>
 
             <a
-              href="https://drive.google.com/file/d/1-HYEn4dk7m-nfc-Vod2f87J9JsZgi0Ut/view?usp=sharing"
+              href="https://drive.google.com/file/d/1CNmQcY_rM2gKHxgORzKbYDZ7STi4TOzL/view?usp=sharing"
               target="_blank"
               rel="noreferrer"
               className="btn btn-outline"
@@ -119,10 +119,10 @@ export default function HeroSection() {
                 <pre className="text-success whitespace-pre-wrap">
 {`{
   "os": "Linux (RHEL 9)",
-  "cloud": "AWS (EC2, S3, IAM)",
+  "cloud": "AWS (EC2, S3, IAM, VPC, RDS, EBS, ELB&ASG, Route53, CloudFront, DNS Management, ACM)",
   "containers": ["Docker", "Kubernetes"],
   "automation": "Ansible",
-  "ci_cd": ["GitHub Actions", "Jenkins"]
+  "ci_cd": ["GitHub Actions", "GitLab CI"]
 }`}
                 </pre>
               </div>
