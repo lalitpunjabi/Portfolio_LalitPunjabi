@@ -52,7 +52,7 @@ export default function HeroSection() {
             </a>
 
             <a
-              href="https://drive.google.com/file/d/1CNmQcY_rM2gKHxgORzKbYDZ7STi4TOzL/view?usp=sharing"
+              href="https://drive.google.com/file/d/1MAdByVPQ6JgwpXKzj5dw7THQwzjrkpop/view?usp=sharing"
               target="_blank"
               rel="noreferrer"
               className="btn btn-outline"
