@@ -18,10 +18,11 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Dependencies (Fix Rollup Issue)
+      - name: Install Dependencies (Fix Rollup Linux Issue)
         run: |
           rm -rf node_modules package-lock.json
           npm install
+          npm install @rollup/rollup-linux-x64-gnu --save-optional
 
       - name: Build Project
         run: npm run build
