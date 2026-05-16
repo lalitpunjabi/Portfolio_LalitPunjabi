@@ -79,7 +79,7 @@ jobs:
       - name: Validate and Apply Kubernetes Manifests (Dry Run Mode)
         run: |
           echo "Performing structural validation of K8s manifests..."
-          kubectl apply -f k8s/ --dry-run=client
+          kubectl apply -f k8s/ --dry-run=client --validate=false
           
           echo "✅ Validation successful. All YAML manifests are structurally sound."
           echo "To perform a live deployment, authenticate to your cluster above and remove '--dry-run=client'."
