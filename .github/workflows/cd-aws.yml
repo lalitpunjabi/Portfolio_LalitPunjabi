@@ -29,6 +29,10 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      # Fix for Rollup on Ubuntu (gnu libc) missing optional dependency
+      - name: Fix Rollup Linux Dependency
+        run: npm install @rollup/rollup-linux-x64-gnu --save-optional
+
       - name: Build Application
         run: npm run build
 
