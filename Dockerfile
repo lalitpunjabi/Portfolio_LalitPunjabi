@@ -10,6 +10,9 @@ COPY package*.json ./
 # Install dependencies (npm ci is preferred for reproducible builds in CI/CD)
 RUN npm ci
 
+# Fix for Rollup on Alpine (musl libc) missing optional dependency
+RUN npm install @rollup/rollup-linux-x64-musl --save-optional
+
 # Copy the rest of the application code
 COPY . .
 
