@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portfolio-ui
+  namespace: default
+  labels:
+    app: portfolio-ui
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: portfolio-ui
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1       # Allow 1 extra pod during update to handle traffic
+      maxUnavailable: 0 # Ensure no downtime by never going below desired replicas
+  template:
+    metadata:
+      labels:
+        app: portfolio-ui
+        tier: frontend
+    spec:
+      containers:
+        - name: portfolio-container
+          image: ghcr.io/lalitpunjabi/portfolio_lalitpunjabi:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: portfolio-config
+          # Security Context: Best practice to prevent privilege escalation
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          # Resources: Prevents node starvation and allows HPA to calculate metrics
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          # Liveness Probe: Restarts the container if it deadlocks
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Readiness Probe: Removes the pod from the Service load balancer if it's not ready to serve traffic
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3

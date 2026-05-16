@@ -1,0 +1,88 @@
+name: Kubernetes Deployment Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Docker Image Automation (GHCR)"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker image tag to deploy (e.g., sha-abcdef1 or latest)'
+        required: true
+        default: 'latest'
+
+jobs:
+  deploy-k8s:
+    name: Deploy to Kubernetes Cluster
+    # Run only if the GHCR image was successfully built and published
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      # ---------------------------------------------------------
+      # ⚠️ CLUSTER AUTHENTICATION (AWS EKS OR CUSTOM KUBECONFIG)
+      # ---------------------------------------------------------
+      # To enable live deployments, uncomment the appropriate block below and add secrets.
+      
+      # OPTION A: AWS EKS
+      # - name: Configure AWS Credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ secrets.AWS_REGION }}
+      # - name: Update KubeConfig for EKS
+      #   run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+
+      # OPTION B: Standard KUBECONFIG (DigitalOcean, Linode, On-Prem)
+      # - name: Set KUBECONFIG
+      #   run: |
+      #     mkdir -p ~/.kube
+      #     echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      #     chmod 600 ~/.kube/config
+
+      - name: Determine Image Tag
+        id: tag
+        run: |
+          # If manual run, use input. If auto-triggered by Docker workflow, use commit SHA.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
+          else
+            SHA=${{ github.event.workflow_run.head_sha }}
+            echo "TAG=sha-${SHA:0:7}" >> $GITHUB_ENV
+          fi
+
+      - name: Dynamically Inject Image Version
+        run: |
+          REPO_LC=${GITHUB_REPOSITORY,,}
+          echo "Updating deployment.yaml with image ghcr.io/${REPO_LC}:${{ env.TAG }}"
+          
+          # Replace the placeholder 'latest' tag with our specific immutable SHA tag
+          sed -i "s|ghcr.io/lalitpunjabi/portfolio_lalitpunjabi:latest|ghcr.io/${REPO_LC}:${{ env.TAG }}|g" k8s/deployment.yaml
+          
+          # Verify injection
+          cat k8s/deployment.yaml | grep image:
+
+      - name: Validate and Apply Kubernetes Manifests (Dry Run Mode)
+        run: |
+          echo "Performing structural validation of K8s manifests..."
+          kubectl apply -f k8s/ --dry-run=client
+          
+          echo "✅ Validation successful. All YAML manifests are structurally sound."
+          echo "To perform a live deployment, authenticate to your cluster above and remove '--dry-run=client'."
+
+      # - name: Verify Zero-Downtime Rollout
+      #   run: kubectl rollout status deployment/portfolio-ui --timeout=120s

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portfolio-config
+  namespace: default
+  labels:
+    app: portfolio-ui
+    environment: production
+data:
+  # Non-sensitive runtime application configurations
+  NODE_ENV: "production"

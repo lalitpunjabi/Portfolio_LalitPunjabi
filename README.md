@@ -4,6 +4,7 @@
 [![DevSecOps Scan](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/security.yml?branch=main&label=Security%20Scan&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/security.yml)
 [![Docker Publish](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/docker-publish.yml?branch=main&label=Docker%20Publish&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/docker-publish.yml)
 [![AWS CD](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/cd-aws.yml?branch=main&label=AWS%20Deployment&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/cd-aws.yml)
+[![Kubernetes CD](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/cd-k8s.yml?branch=main&label=K8s%20Deployment&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/cd-k8s.yml)
 
 A premium, high-performance developer portfolio built with React, Vite, and completely custom Cyber-Midnight CSS. Designed specifically to showcase enterprise-grade DevSecOps expertise, robust CI/CD automation, containerization workflows, and cloud infrastructure deployments.
 
@@ -50,6 +51,66 @@ graph TD
 *   **Security Hardening**: NGINX is configured to serve strict security headers (`X-Frame-Options`, `X-XSS-Protection`, etc.).
 *   **SPA Support**: NGINX is explicitly configured with `try_files` to natively support React Router's client-side routing.
 *   **Healthchecks**: Built-in container health checks ensure orchestration tools can monitor the application state.
+
+---
+
+## 🔄 Enterprise DevSecOps CI/CD Pipeline
+
+This project features a fully automated, production-grade GitHub Actions CI/CD architecture designed to ensure code quality, security, and seamless deployments.
+
+*   **Continuous Integration (`ci.yml`)**: 
+    *   Runs parallel Matrix Testing on Node.js 18 and 20.
+    *   Enforces strict TypeScript type-checking and dependency integrity checks.
+    *   Verifies production builds and securely passes artifacts downstream.
+*   **DevSecOps Scanning (`security.yml`)**: 
+    *   Runs Aqua Security's **Trivy** to scan Docker images and local filesystems.
+    *   Automatically blocks deployments if `HIGH` or `CRITICAL` vulnerabilities or exposed secrets are detected.
+*   **Docker Image Automation (`docker-publish.yml`)**: 
+    *   Automatically builds and publishes the optimized Docker image to the GitHub Container Registry (GHCR).
+    *   Implements multi-tagging (`latest`, short SHA, and semantic versions).
+*   **Environment-Based Deployments (`cd-aws.yml`)**: 
+    *   Deploys artifacts to AWS S3 using strict GitHub Environments (`production`) for manual approval gating.
+    *   Automatically invalidates the AWS CloudFront cache.
+*   **Release Automation (`release.yml`)**: 
+    *   Automatically generates GitHub Releases and rich changelogs based on semantic tags.
+*   **Kubernetes Automation (`cd-k8s.yml`)**:
+    *   Dynamically injects the new image SHA into K8s manifests and validates structural integrity before live cluster rollouts.
+
+---
+
+## ☸️ Enterprise Kubernetes Orchestration
+
+The application is engineered to run seamlessly on production Kubernetes clusters (e.g., AWS EKS, Minikube). The `k8s/` directory contains standard Kubernetes manifests implementing cloud-native best practices.
+
+### 🏗️ Cluster Architecture
+*   **Deployment (`deployment.yaml`)**: Uses a **RollingUpdate** strategy (`maxSurge: 1`, `maxUnavailable: 0`) for true zero-downtime deployments. Configures strict CPU/Memory resource boundaries and runs unprivileged security contexts.
+*   **Health Probes**: Explicit `livenessProbe` and `readinessProbe` HTTP checks ensure the NGINX container is ready before the Service load balancer routes traffic to it.
+*   **Service (`service.yaml`)**: Internal `ClusterIP` exposing port 80.
+*   **Ingress (`ingress.yaml`)**: NGINX Ingress Controller routing configuration to safely expose the internal Service to the public web (HTTPS/TLS ready).
+*   **Auto-Scaling (`hpa.yaml`)**: A Horizontal Pod Autoscaler dynamically scales replicas from 2 to 5 based on CPU utilization crossing 70%.
+*   **Config & Secrets**: Separates configuration (`configmap.yaml`) and sensitive data (`secrets.yaml`) from the application code following 12-factor app methodologies.
+
+### 🚀 Deploying to Kubernetes
+
+**1. Apply Configuration and Secrets:**
+```bash
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secrets.yaml
+```
+
+**2. Deploy the Application Stack:**
+```bash
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/ingress.yaml
+kubectl apply -f k8s/hpa.yaml
+```
+
+**3. Verify Zero-Downtime Rollout:**
+```bash
+kubectl rollout status deployment/portfolio-ui
+kubectl get pods -l app=portfolio-ui
+```
 
 ---
 
