@@ -76,13 +76,28 @@ jobs:
           # Verify injection
           cat k8s/deployment.yaml | grep image:
 
-      - name: Validate and Apply Kubernetes Manifests (Dry Run Mode)
+      - name: Install Kubeconform (Offline Validator)
         run: |
-          echo "Performing structural validation of K8s manifests..."
-          kubectl apply -f k8s/ --dry-run=client --validate=false
+          wget https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz
+          tar xf kubeconform-linux-amd64.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validate Kubernetes Manifests
+        run: |
+          echo "Performing strict offline validation of K8s manifests..."
+          kubeconform -strict -summary k8s/
           
           echo "✅ Validation successful. All YAML manifests are structurally sound."
-          echo "To perform a live deployment, authenticate to your cluster above and remove '--dry-run=client'."
+
+      # ---------------------------------------------------------
+      # ⚠️ LIVE DEPLOYMENT
+      # ---------------------------------------------------------
+      # Uncomment the step below once you have configured your cluster authentication above.
+      
+      # - name: Deploy to Kubernetes
+      #   run: |
+      #     kubectl apply -f k8s/
+      #     kubectl rollout status deployment/portfolio-ui --timeout=120s
 
       # - name: Verify Zero-Downtime Rollout
       #   run: kubectl rollout status deployment/portfolio-ui --timeout=120s
