@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function ParticleBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [particles, setParticles] = useState<Array<{ id: number; left: string; delay: string; duration: string; size: string }>>([]);
   const [hexagons, setHexagons] = useState<Array<{ id: number; top: string; left: string; delay: string; scale: string }>>([]);
   const [dataFlows, setDataFlows] = useState<Array<{ id: number; left: string; delay: string }>>([]);
@@ -35,8 +36,83 @@ export default function ParticleBackground() {
     setDataFlows(dataArray);
   }, []);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const fontSize = 14;
+    const rainDrops: number[] = [];
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Update columns array length to match new width if it grows
+      const newColumns = Math.floor(canvas.width / fontSize);
+      if (newColumns > rainDrops.length) {
+        const currentLen = rainDrops.length;
+        for (let i = currentLen; i < newColumns; i++) {
+          rainDrops.push(Math.random() * -100);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = `${fontSize}px Courier New, monospace`;
+
+      for (let i = 0; i < rainDrops.length; i++) {
+        const y = rainDrops[i];
+
+        // Draw head character (brighter cyan)
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.45)';
+        const headText = Math.random() > 0.5 ? '1' : '0';
+        ctx.fillText(headText, i * fontSize, y * fontSize);
+
+        // Draw trail (fading opacity)
+        const trailLength = 8;
+        for (let j = 1; j <= trailLength; j++) {
+          const trailY = y - j;
+          if (trailY >= 0) {
+            const opacity = 0.25 * (1 - j / trailLength);
+            ctx.fillStyle = `rgba(0, 229, 255, ${opacity})`;
+            const tailText = Math.random() > 0.5 ? '1' : '0';
+            ctx.fillText(tailText, i * fontSize, trailY * fontSize);
+          }
+        }
+
+        // Increment drop position or reset
+        if (y * fontSize > canvas.height && Math.random() > 0.985) {
+          rainDrops[i] = 0;
+        } else {
+          rainDrops[i] += 0.55; // slow drift
+        }
+      }
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    animationId = requestAnimationFrame(draw);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
   return (
     <div className="particle-container">
+      {/* Binary Code Rain Background Layer */}
+      <canvas ref={canvasRef} className="binary-rain" />
+
       {/* Corner Decorations */}
       <div className="corner-decoration corner-tl"></div>
       <div className="corner-decoration corner-tr"></div>

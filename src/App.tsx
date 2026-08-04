@@ -22,11 +22,11 @@ function App() {
       <main>
         <HeroSection />
         <AboutSection />
+        <ExperienceSection />
         <EducationSection />
         <TechStackSection />
         <ProjectsSection />
         <CertificationsSection />
-        <ExperienceSection />
         <StatsSection />
         <ContactSection />
       </main>

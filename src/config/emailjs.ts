@@ -3,16 +3,16 @@
 
 export const EMAILJS_CONFIG = {
   // Step 1: Get this from Email Services > Your Gmail Service
-  serviceId: 'service_150nk2g', // e.g., 'service_abc123xyz'
+  serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_150nk2g',
   
   // Step 2: Get this from Email Templates > Your Template
-  templateId: 'template_21d4nqe', // e.g., 'template_xyz789'
+  templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_21d4nqe',
   
   // Step 3: Get this from Account > API Keys > Public Key
-  publicKey: 'dbm9TiSEDNZpIYS_Q', // e.g., 'user_abc123xyz'
+  publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'dbm9TiSEDNZpIYS_Q',
   
   // Your email where you'll receive messages
-  toEmail: 'lalitpunjabi.pro@gmail.com'
+  toEmail: import.meta.env.VITE_EMAILJS_TO_EMAIL || 'lalitpunjabi.pro@gmail.com'
 };
 
 // QUICK SETUP GUIDE:

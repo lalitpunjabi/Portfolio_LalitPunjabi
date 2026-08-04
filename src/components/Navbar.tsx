@@ -5,12 +5,19 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
+
+      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalScroll > 0) {
+        setScrollProgress((window.scrollY / totalScroll) * 100);
+      }
     };
     window.addEventListener('scroll', handleScroll);
+    handleScroll();
 
     const sections = document.querySelectorAll('section[id]');
     const observer = new IntersectionObserver((entries) => {
@@ -31,6 +38,7 @@ export default function Navbar() {
 
   const navItems = [
     { id: 'about', label: 'About' },
+    { id: 'experience', label: 'Experience' },
     { id: 'education', label: 'Education' },
     { id: 'tech-stack', label: 'Tech Stack' },
     { id: 'projects', label: 'Projects' },
@@ -39,6 +47,8 @@ export default function Navbar() {
 
   return (
     <header className={`navbar ${scrolled ? 'navbar-scrolled py-2' : 'py-4'}`} style={{ transition: 'all 0.3s ease' }}>
+      {/* Scroll Progress Bar */}
+      <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }}></div>
       <div className="container nav-container relative z-50 px-4 md:px-6 lg:px-8">
         <a href="#" className="nav-logo hover:scale-105 transition-transform duration-300 group">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-accent-primary font-bold text-xl sm:text-2xl tracking-tight drop-shadow-[0_0_10px_rgba(236,72,153,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(236,72,153,0.6)] transition-all duration-300 inline-block">&lt;LP /&gt;</span>
@@ -87,11 +97,11 @@ export default function Navbar() {
         <div className="mobile-menu animate-slide-down-fade backdrop-blur-xl bg-bg-main/95 absolute top-full left-0 w-full border-t border-color shadow-lg md:hidden">
           <nav className="px-4 py-6">
             <ul className="mobile-nav-links space-y-4">
-              {['About', 'Education', 'Tech Stack', 'Projects', 'Certifications'].map((item, idx) => (
-                <li key={idx} className="group">
-                  <a href={`#${item.toLowerCase().replace(' ', '-')}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 group-hover:translate-x-2 transition-all duration-300 text-text-secondary hover:text-text-primary">
+              {navItems.map((item) => (
+                <li key={item.id} className="group">
+                  <a href={`#${item.id}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 group-hover:translate-x-2 transition-all duration-300 text-text-secondary hover:text-text-primary">
                     <span className="w-0 h-[2px] bg-gradient-to-r from-accent-primary to-purple-400 group-hover:w-4 transition-all duration-300"></span>
-                    {item}
+                    {item.label}
                   </a>
                 </li>
               ))}

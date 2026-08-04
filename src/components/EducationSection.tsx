@@ -1,4 +1,5 @@
 import { GraduationCap } from 'lucide-react';
+import SpotlightCard from './SpotlightCard';
 
 export default function EducationSection() {
   const educationList = [
@@ -41,9 +42,9 @@ export default function EducationSection() {
         
         <div className="flex flex-col gap-4 sm:gap-5 md:gap-6 max-w-5xl mx-auto">
           {educationList.map((edu, index) => (
-            <div 
+            <SpotlightCard 
               key={index} 
-              className="glass-panel p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl relative overflow-hidden transition-all hover:shadow-glow group cursor-default hover-lift hover:border-accent-primary/40 animate-scale-in tech-border"
+              className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl relative overflow-hidden transition-all hover:shadow-glow group cursor-default hover-lift hover:border-accent-primary/40 animate-scale-in tech-border"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Enhanced effects */}
@@ -69,7 +70,7 @@ export default function EducationSection() {
                   </span>
                 </div>
               </div>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
       </div>

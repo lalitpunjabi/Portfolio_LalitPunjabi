@@ -118,7 +118,7 @@ export default function ContactSection() {
                       <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">Location</span>
                       <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_10px_rgba(124,58,237,0.8)]"></div>
                     </div>
-                    <p className="text-text-primary font-bold text-lg">Bikaner, Rajasthan, India</p>
+                    <p className="text-text-primary font-bold text-lg">Jaipur, Rajasthan, India</p>
                     <p className="text-text-tertiary text-sm mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Open to remote & relocation</p>
                   </div>
                   <div className="absolute right-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-500">

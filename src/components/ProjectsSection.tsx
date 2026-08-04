@@ -1,4 +1,5 @@
 import { ExternalLink, Github, Code2, Database, LayoutTemplate, Activity } from 'lucide-react';
+import SpotlightCard from './SpotlightCard';
 
 export default function ProjectsSection() {
   // The specific 4 projects requested by the user
@@ -60,9 +61,9 @@ export default function ProjectsSection() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
           {projects.map((project, index) => (
-            <div 
+            <SpotlightCard 
               key={index} 
-              className="glass-panel group transition-all duration-[600ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-2 md:hover:-translate-y-3 hover:shadow-glow flex flex-col rounded-xl overflow-hidden relative border border-color hover:border-accent-primary/40 animate-scale-in hover-lift tech-border"
+              className="group transition-all duration-[600ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-2 md:hover:-translate-y-3 hover:shadow-glow flex flex-col rounded-xl overflow-hidden relative border border-color hover:border-accent-primary/40 animate-scale-in hover-lift tech-border"
               style={{ animationDelay: `${index * 150}ms` }}
             >
               {/* Enhanced holographic scan line effect */}
@@ -142,7 +143,7 @@ export default function ProjectsSection() {
                   ))}
                 </div>
               </div>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
         

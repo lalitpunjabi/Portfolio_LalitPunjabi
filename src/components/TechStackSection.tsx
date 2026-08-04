@@ -1,38 +1,39 @@
-import { Server, Monitor, Layers, Code2, Wrench } from 'lucide-react';
+import { Server, Monitor, Code2, Wrench, Cloud } from 'lucide-react';
+import SpotlightCard from './SpotlightCard';
 
 export default function TechStackSection() {
   const categories = [
     {
-      title: 'Containerization & Automation',
-      items: ['Kubernetes', 'Docker', 'Ansible'],
-      icon: <Server size={20} />,
+      title: 'Cloud & Infrastructure (IaC)',
+      items: ['AWS', 'EC2', 'S3', 'IAM', 'VPC', 'RDS', 'EBS', 'ELB', 'Auto Scaling', 'CloudFront', 'ACM', 'Route 53', 'Terraform'],
+      icon: <Cloud size={20} />,
       color: 'text-accent-primary',
       bgFade: 'from-accent-primary'
     },
     {
-      title: 'Operating Systems',
-      items: ['Linux (RHEL9)', 'RHEL'],
-      icon: <Monitor size={20} />,
+      title: 'Containerization & CI/CD',
+      items: ['Docker', 'Kubernetes', 'Jenkins', 'GitHub Actions', 'GitLab CI/CD', 'Ansible'],
+      icon: <Server size={20} />,
       color: 'text-accent-purple',
       bgFade: 'from-accent-purple'
     },
     {
-      title: 'Tech Stack & Services',
-      items: ['LAMP', 'AWS'],
-      icon: <Layers size={20} />,
+      title: 'Operating Systems & Scripting',
+      items: ['Linux (RHEL)', 'Ubuntu', 'Amazon Linux', 'Bash', 'YAML'],
+      icon: <Monitor size={20} />,
       color: 'text-emerald-400',
       bgFade: 'from-emerald-400'
     },
     {
-      title: 'Languages',
-      items: ['Python', 'Java', 'C++', 'C'],
+      title: 'Programming & Databases',
+      items: ['Python', 'Java', 'C++', 'C', 'MySQL', 'PostgreSQL'],
       icon: <Code2 size={20} />,
       color: 'text-blue-400',
       bgFade: 'from-blue-400'
     },
     {
-      title: 'Developer Tools',
-      items: ['VM Workstation', 'Git & GitHub', 'GitLab', 'Visual Studio Code', 'Eclipse', 'MySQL'],
+      title: 'Tools & Virtualization',
+      items: ['Git & GitHub', 'VS Code', 'VMware Workstation'],
       icon: <Wrench size={20} />,
       color: 'text-amber-400',
       bgFade: 'from-amber-400'
@@ -57,9 +58,9 @@ export default function TechStackSection() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {categories.map((category, index) => (
-            <div 
+            <SpotlightCard 
               key={index} 
-              className="glass-panel p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl relative overflow-hidden group hover-lift hover:border-accent-primary/40 transition-all duration-500 animate-scale-in hover:shadow-glow tech-border"
+              className="p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl relative overflow-hidden group hover-lift hover:border-accent-primary/40 transition-all duration-500 animate-scale-in hover:shadow-glow tech-border"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Enhanced gradient overlay */}
@@ -88,7 +89,7 @@ export default function TechStackSection() {
                   </span>
                 ))}
               </div>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
       </div>

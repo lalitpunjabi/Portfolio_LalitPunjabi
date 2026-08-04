@@ -1234,3 +1234,96 @@ h1, h2, h3, h4, h5, h6 {
   90% { opacity: 0.3; }
   100% { top: 110%; opacity: 0; }
 }
+
+/* Spotlight Card Mouse-Follow Border & Glow */
+.spotlight-card {
+  position: relative;
+  background: var(--bg-tertiary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+}
+
+.spotlight-card:hover {
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-4px);
+}
+
+/* Drawing the dynamic spotlight glow mask using CSS variables */
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(0, 229, 255, 0.08),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+/* Border tracing spotlight */
+.spotlight-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: radial-gradient(
+    400px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(0, 229, 255, 0.25),
+    rgba(124, 58, 237, 0.1),
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+.spotlight-card:hover::after {
+  opacity: 1;
+}
+
+/* Cyber Glitch Effect on Title Hover */
+.cyber-glitch-hover:hover {
+  text-shadow: 
+    -2px -2px 0px rgba(0, 229, 255, 0.5),
+    2px 2px 0px rgba(124, 58, 237, 0.5);
+  animation: glitch-anim 0.3s linear infinite;
+}
+
+@keyframes glitch-anim {
+  0% { text-shadow: -2px -2px 0px rgba(0, 229, 255, 0.5), 2px 2px 0px rgba(124, 58, 237, 0.5); }
+  50% { text-shadow: 2px -2px 0px rgba(0, 229, 255, 0.5), -2px 2px 0px rgba(124, 58, 237, 0.5); }
+  100% { text-shadow: -2px -2px 0px rgba(0, 229, 255, 0.5), 2px 2px 0px rgba(124, 58, 237, 0.5); }
+}
+
+/* Scroll Progress Bar at top of screen */
+.scroll-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-purple), var(--accent-green));
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 5px rgba(124, 58, 237, 0.5);
+  transition: width 0.1s ease-out;
+}

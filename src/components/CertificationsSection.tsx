@@ -1,5 +1,6 @@
 import { Award, CheckCircle } from 'lucide-react';
 import { cloneElement } from 'react';
+import SpotlightCard from './SpotlightCard';
 
 export default function CertificationsSection() {
   const certifications = [
@@ -69,14 +70,17 @@ export default function CertificationsSection() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           {certifications.map((cert, index) => (
-            <a 
-              href={cert.link} 
-              target="_blank" 
-              rel="noreferrer" 
-              key={index} 
-              className="cert-card p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl flex items-start gap-3 sm:gap-4 transition-all hover:shadow-glow group glass-panel relative overflow-hidden cursor-pointer hover-lift hover:border-accent-primary/40 animate-scale-in"
+            <SpotlightCard
+              key={index}
+              className="rounded-lg sm:rounded-xl overflow-hidden hover-lift hover:border-accent-primary/40 animate-scale-in"
               style={{ animationDelay: `${index * 80}ms` }}
             >
+              <a 
+                href={cert.link} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="cert-card p-4 sm:p-5 md:p-6 flex items-start gap-3 sm:gap-4 transition-all hover:shadow-glow group relative overflow-hidden cursor-pointer w-full h-full"
+              >
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.2)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="bg-bg-tertiary p-2.5 sm:p-3 rounded-lg sm:rounded-xl border border-color relative z-10 group-hover:border-accent-primary/40 group-hover:bg-accent-primary/10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm group-hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] shrink-0">
                 {cloneElement(cert.icon, { 
@@ -91,6 +95,7 @@ export default function CertificationsSection() {
                 </div>
               </div>
             </a>
+            </SpotlightCard>
           ))}
         </div>
       </div>
