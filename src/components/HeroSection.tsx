@@ -176,7 +176,7 @@ export default function HeroSection() {
             </a>
 
             <a
-              href="https://drive.google.com/file/d/1twAPN20xG0up_WhBbavkAZh8WFr0LdkK/view?usp=sharing"
+              href="https://drive.google.com/file/d/1HLKgUImrQAsIRylnowpZaikM_608o-_D/view?usp=sharing"
               target="_blank"
               rel="noreferrer"
               className="btn btn-outline"
