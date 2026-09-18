@@ -1,16 +1,18 @@
-import { Server, Cloud, Code, ShieldCheck } from 'lucide-react';
+import { Server, Cloud, Code2, ShieldCheck, Box } from 'lucide-react';
 import SpotlightCard from './SpotlightCard';
 import { skillsData } from '../data/skills';
 
 export default function TechStackSection() {
   const getIcon = (name: string) => {
     switch (name) {
-      case 'Server': return <Server size={20} />;
+      case 'Container': return <Box size={20} />;
       case 'Cloud': return <Cloud size={20} />;
-      case 'Code': return <Code size={20} />;
-      default: return <ShieldCheck size={20} />;
+      case 'Code2': return <Code2 size={20} />;
+      case 'ShieldCheck': return <ShieldCheck size={20} />;
+      default: return <Server size={20} />;
     }
   };
+
 
   return (
     <section id="tech-stack" className="section relative overflow-hidden px-4 md:px-6 lg:px-8">

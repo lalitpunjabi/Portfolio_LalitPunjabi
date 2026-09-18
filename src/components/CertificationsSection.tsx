@@ -3,6 +3,19 @@ import SpotlightCard from './SpotlightCard';
 import { certificationsData } from '../data/certifications';
 
 export default function CertificationsSection() {
+  const getCategoryBadgeClass = (category: string) => {
+    switch (category) {
+      case 'DevOps & Linux':
+        return 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10';
+      case 'Cloud & Enterprise':
+        return 'border-purple-500/30 text-purple-400 bg-purple-500/10';
+      case 'AI & GenAI':
+        return 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10';
+      default:
+        return 'border-accent-primary/30 text-accent-primary bg-accent-primary/10';
+    }
+  };
+
   return (
     <section id="certifications" className="section relative overflow-hidden px-4 md:px-6 lg:px-8">
       {/* Background effects */}
@@ -33,10 +46,22 @@ export default function CertificationsSection() {
                 
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-base sm:text-lg font-bold text-text-primary leading-snug group-hover:text-accent-primary transition-colors">
-                      {cert.name}
-                    </h3>
-                    <span className={`px-2.5 py-0.5 text-xs font-mono rounded-full border ${cert.badgeColor} shrink-0`}>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-snug group-hover:text-accent-primary transition-colors">
+                        {cert.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`px-2.5 py-0.5 text-[11px] font-mono rounded-full border ${getCategoryBadgeClass(cert.category)}`}>
+                          {cert.category}
+                        </span>
+                        {cert.featured && (
+                          <span className="px-2 py-0.5 text-[10px] font-mono rounded-full border border-amber-500/40 text-amber-400 bg-amber-500/10">
+                            ★ Featured
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-0.5 text-xs font-mono rounded-full border border-color text-text-tertiary bg-bg-secondary shrink-0">
                       {cert.date}
                     </span>
                   </div>
@@ -68,4 +93,5 @@ export default function CertificationsSection() {
     </section>
   );
 }
+
 
