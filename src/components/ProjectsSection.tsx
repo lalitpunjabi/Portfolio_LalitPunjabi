@@ -1,155 +1,354 @@
-import { ExternalLink, Github, Code2, Database, LayoutTemplate, Activity } from 'lucide-react';
+import { useState } from 'react';
+import { ExternalLink, Github, Code2, Database, LayoutTemplate, Activity, ShieldCheck, FileCode, CheckCircle2, Copy, Check } from 'lucide-react';
 import SpotlightCard from './SpotlightCard';
 
 export default function ProjectsSection() {
-  // The specific 4 projects requested by the user
+  const [activeTabs, setActiveTabs] = useState<Record<number, 'overview' | 'code' | 'security'>>({
+    0: 'overview',
+    1: 'overview',
+    2: 'overview',
+    3: 'overview'
+  });
+
+  const [copiedCodeIndex, setCopiedCodeIndex] = useState<number | null>(null);
+
+  const setTab = (index: number, tab: 'overview' | 'code' | 'security') => {
+    setActiveTabs(prev => ({ ...prev, [index]: tab }));
+  };
+
+  const copyCode = (code: string, index: number) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCodeIndex(index);
+    setTimeout(() => setCopiedCodeIndex(null), 2000);
+  };
+
   const projects = [
     {
-      title: 'BloodMate – Enterprise-Grade Blood Bank Management System',
-      problem: 'BloodMate is a modular, MVC-architected desktop application built using Java 17, JavaFX 21, and MySQL 8, designed to streamline end-to-end blood bank operations. The system implements robust donor and recipient management, real-time blood inventory tracking with expiration monitoring, emergency request handling, campaign coordination, and advanced analytics reporting.',
-      architecture: 'MVC-based layered architecture (Controller → Service → DAO → Database) leveraging JDBC with optimized database connectivity.',
-      deployment: 'Event-driven architecture with programmatic navigation handling. ScrollPane-optimized responsive UI with hardware acceleration. MySQL schema automation and connection pooling.',
-      techStack: ['Java 17', 'JavaFX 21', 'MySQL 8', 'JDBC', 'Maven', 'FXML', 'CSS'],
+      title: 'BloodMate – Enterprise Blood Bank Management System',
+      filename: 'bloodmate_engine.java',
+      problem: 'BloodMate is a modular, MVC-architected application built using Java 17, JavaFX 21, and MySQL 8. Designed to streamline end-to-end blood bank operations, donor tracking, real-time expiration monitoring, emergency requests, and analytics reporting.',
+      architecture: 'MVC layered architecture (Controller → Service → DAO → Database) leveraging JDBC with HikariCP connection pooling.',
+      deployment: 'Event-driven UI navigation with hardware acceleration. Programmatic MySQL schema migrations and pool optimization.',
+      techStack: ['Java 17', 'JavaFX 21', 'MySQL 8', 'JDBC', 'Maven', 'CSS'],
       githubLink: 'https://github.com/lalitpunjabi/BloodMate-Advanced',
-      icon: <Activity size={24} className="text-accent" />
+      icon: <Activity size={22} className="text-accent-primary" />,
+      codeSnippet: `// MySQL HikariCP Connection Pool & Schema Init
+public class DatabaseManager {
+    private static final String URL = "jdbc:mysql://localhost:3306/bloodmate_db";
+    private static HikariDataSource dataSource;
+
+    static {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(URL);
+        config.setUsername("bloodmate_app");
+        config.setMaximumPoolSize(10);
+        dataSource = new HikariDataSource(config);
+    }
+}`,
+      securityControls: [
+        'BCrypt password hashing for medical staff authentication',
+        'Strict PreparedStatement parameterization preventing SQL Injection',
+        'Role-based Access Control (Admin vs Hospital Staff)'
+      ]
     },
     {
       title: 'CitySamadhan – Civic Complaint Management System',
-      problem: 'CitySamadhan is a scalable, full-stack web application designed to digitize and streamline civic complaint resolution. The system implements secure user authentication with OTP verification, complaint lifecycle management, real-time status tracking, community-driven prioritization (upvote/downvote system), department-based workflow routing, and automated email/in-app notifications.',
-      architecture: 'MVC-inspired Flask application with ORM-backed data layer and RESTful endpoints. Integrates geolocation services using GeoPy.',
-      deployment: 'RESTful route design with modular Flask structure. ORM-based database modeling (SQLite for development, PostgreSQL-ready).',
-      techStack: ['Python', 'Flask', 'SQLAlchemy', 'PostgreSQL', 'HTML5', 'CSS3', 'Jinja2', 'Flask-Mail', 'GeoPy'],
+      filename: 'city_samadhan_app.py',
+      problem: 'CitySamadhan is a scalable full-stack web platform digitizing civic complaint resolution. Features secure user authentication with OTP verification, complaint lifecycle management, community upvoting, and department routing.',
+      architecture: 'MVC-inspired Flask architecture with ORM-backed data layer and REST endpoints. Geolocation calculations powered by GeoPy.',
+      deployment: 'RESTful API design with modular Flask blueprints. PostgreSQL-ready database modeling using SQLAlchemy ORM.',
+      techStack: ['Python', 'Flask', 'SQLAlchemy', 'PostgreSQL', 'Jinja2', 'Flask-Mail'],
       githubLink: 'https://github.com/lalitpunjabi/CitySamadhan-Final-',
-      icon: <Database size={24} className="text-accent" />
+      icon: <Database size={22} className="text-accent-primary" />,
+      codeSnippet: `# Flask SQLAlchemy ORM Complaint Endpoint
+@app.route('/api/complaints', methods=['POST'])
+@login_required
+def create_complaint():
+    data = request.get_json()
+    new_ticket = Complaint(
+        title=data['title'],
+        department=route_department(data['category']),
+        lat=data['latitude'], lon=data['longitude'],
+        user_id=current_user.id
+    )
+    db.session.add(new_ticket)
+    db.session.commit()
+    send_notification_email(current_user.email, new_ticket.id)`,
+      securityControls: [
+        'OTP email verification for valid citizen complaint reporting',
+        'CSRF token protection across Flask form endpoints',
+        'Municipal boundary sanitization via GeoPy'
+      ]
     },
     {
       title: 'HoodNite – Full-Stack Nightlife Discovery Platform',
-      problem: 'HoodNite is a modern full-stack application designed to help users discover nightlife events, explore venues, and manage shared expenses seamlessly. The platform implements a scalable RESTful API architecture with JWT-based authentication, protected routes, role-based admin controls, and modular backend routing.',
-      architecture: 'Decoupled frontend-backend architecture with REST API and token-based authentication. Features dynamic event filtering and real-time bill-splitting logic.',
-      deployment: 'RESTful Express API with modular route separation. MongoDB schema design using Mongoose ODM. JWT authentication with middleware-based route protection.',
-      techStack: ['Next.js 14', 'React', 'Node.js', 'Express', 'MongoDB', 'Mongoose', 'JWT', 'Tailwind CSS', 'Framer Motion'],
+      filename: 'Dockerfile.production',
+      problem: 'HoodNite is a modern full-stack application for discovering nightlife events, exploring venues, and managing shared expenses. Built with REST API architecture, JWT authentication, and role-based admin controls.',
+      architecture: 'Decoupled Next.js frontend & Express backend with REST API endpoints, JWT token protection, and dynamic event filtering.',
+      deployment: 'Multi-stage Docker containerization on Alpine Linux. Containerized deployment with automated health checks.',
+      techStack: ['Next.js 14', 'React', 'Node.js', 'Express', 'MongoDB', 'JWT', 'Tailwind CSS'],
       githubLink: 'https://github.com/lalitpunjabi/HoodNite',
-      icon: <LayoutTemplate size={24} className="text-accent" />
+      icon: <LayoutTemplate size={22} className="text-accent-primary" />,
+      codeSnippet: `# Multi-stage Production OCI Dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+USER node
+EXPOSE 3000
+CMD ["node", "dist/server.js"]`,
+      securityControls: [
+        'Non-root container user execution (`USER node`) in Alpine',
+        'JWT Bearer token middleware on protected API routes',
+        'Express Rate Limiting (100 req/15min per client IP)'
+      ]
     },
     {
       title: 'DateVibe – Romantic Date Planning Web Application',
-      problem: 'DateVibe is a modern frontend-focused web application designed to deliver a premium venue discovery and booking experience. The application implements a component-driven architecture with strong type safety, modular routing, and centralized state management. It features advanced client-side filtering, dynamic venue detail rendering, wishlist management, and mock booking workflows.',
-      architecture: 'Component-driven SPA with centralized state management and modular routing. Real-time dynamic filtering and sorting logic on structured datasets.',
-      deployment: 'Type-safe React component architecture using TypeScript. Context-based state isolation. Design-system-driven UI with custom Tailwind theme configuration.',
-      techStack: ['React 18', 'TypeScript', 'Vite', 'Tailwind CSS', 'React Router', 'Context API'],
+      filename: 'venue_context.ts',
+      problem: 'DateVibe is a frontend-focused venue discovery application delivering curated dating venue suggestions. Implements dynamic client-side filtering, wishlist management, and mock booking workflows.',
+      architecture: 'Component-driven SPA architecture with strong TypeScript type safety, Context API state isolation, and custom Tailwind styling.',
+      deployment: 'Vite build pipeline with chunk splitting and production bundle minification. Context API global state management.',
+      techStack: ['React 18', 'TypeScript', 'Vite', 'Tailwind CSS', 'React Router'],
       githubLink: 'https://github.com/lalitpunjabi/DateVibe-AceHack',
-      icon: <Code2 size={24} className="text-accent" />
+      icon: <Code2 size={22} className="text-accent-primary" />,
+      codeSnippet: `// Type-safe State Engine & Context Provider
+export interface Venue {
+  id: string;
+  name: string;
+  rating: number;
+  category: 'restaurant' | 'lounge' | 'outdoor';
+}
+
+export const VenueContext = createContext<{
+  venues: Venue[];
+  filterCategory: (cat: string) => void;
+}>({ venues: [], filterCategory: () => {} });`,
+      securityControls: [
+        'Strict TypeScript compilation (`noImplicitAny: true`)',
+        'Sanitized client-side search input sanitization',
+        'Vite bundle tree-shaking & security audits'
+      ]
     }
   ];
 
   return (
     <section id="projects" className="section bg-secondary relative overflow-hidden px-4 md:px-6 lg:px-8">
-      {/* Enhanced background effects */}
+      {/* Background ambient lighting */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[300px] sm:w-[400px] md:w-[500px] h-[300px] sm:h-[400px] md:h-[500px] bg-accent-primary/5 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] sm:w-[400px] md:w-[600px] h-[300px] sm:h-[400px] md:h-[600px] bg-accent-purple/5 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-accent-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent-purple/5 rounded-full blur-3xl"></div>
       </div>
       
       <div className="container relative z-10">
-        <div className="text-center mb-8 md:mb-10 lg:mb-12 animate-slide-up-fade">
-          <h2 className="section-title inline-block relative group text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-            Production-Ready Architecture
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-accent-primary via-purple-500 to-pink-500 group-hover:w-full transition-all duration-700 shadow-[0_0_20px_rgba(0,229,255,0.6)]"></div>
+        
+        {/* Section Title */}
+        <div className="text-center mb-10 animate-slide-up-fade">
+          <h2 className="section-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
+            Production-Ready Architecture & Projects
           </h2>
-          <p className="text-text-secondary mt-4 text-base sm:text-lg max-w-2xl mx-auto px-2">Enterprise-grade solutions with scalable architecture and clean code practices</p>
+          <p className="text-text-secondary mt-3 text-base sm:text-lg max-w-2xl mx-auto">
+            Explore architecture blueprints, multi-stage Dockerfiles, and DevSecOps security controls.
+          </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
-          {projects.map((project, index) => (
-            <SpotlightCard 
-              key={index} 
-              className="group transition-all duration-[600ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-2 md:hover:-translate-y-3 hover:shadow-glow flex flex-col rounded-xl overflow-hidden relative border border-color hover:border-accent-primary/40 animate-scale-in hover-lift tech-border"
-              style={{ animationDelay: `${index * 150}ms` }}
-            >
-              {/* Enhanced holographic scan line effect */}
-              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent shadow-[0_0_20px_rgba(0,229,255,0.8)] opacity-0 group-hover:opacity-100 group-hover:animate-[scan_3s_linear_infinite] z-20 pointer-events-none"></div>
-              {/* Animated gradient mesh */}
-              <div className="absolute inset-0 bg-gradient-to-br from-accent-primary/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-              {/* Shimmer overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none"></div>
-              {/* Corner glow */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-bl-3xl pointer-events-none"></div>
-              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.2)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="bg-secondary/50 border-b border-color px-3 sm:px-4 py-2.5 sm:py-3 flex items-center relative group-hover:bg-secondary/70 transition-all duration-500">
-                <div className="flex gap-2 sm:gap-2.5">
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400/20 border border-red-400/50 group-hover:bg-red-400/40 group-hover:border-red-400/80 transition-all duration-500"></div>
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-400/20 border border-amber-400/50 group-hover:bg-amber-400/40 group-hover:border-amber-400/80 transition-all duration-500"></div>
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-400/20 border border-emerald-400/50 group-hover:bg-emerald-400/40 group-hover:border-emerald-400/80 transition-all duration-500"></div>
-                </div>
-                <div className="absolute inset-x-0 text-center text-[10px] sm:text-xs font-mono text-text-tertiary pointer-events-none">
-                  {project.title.split(' ')[0].toLowerCase()}.sh
-                </div>
-                <div className="ml-auto flex items-center gap-2 sm:gap-3">
-                   <a href={project.githubLink} target="_blank" rel="noreferrer" className="text-text-secondary hover:text-accent-primary hover:scale-125 transition-all duration-300">
-                     <Github size={14} className="sm:size-16" />
-                   </a>
-                   <a href={project.githubLink} target="_blank" rel="noreferrer" className="text-text-secondary hover:text-accent-primary hover:scale-125 hover:rotate-12 transition-all duration-300">
-                     <ExternalLink size={14} className="sm:size-16" />
-                   </a>
-                </div>
-              </div>
-              <div className="p-4 sm:p-5 md:p-6 flex-1 flex flex-col relative bg-main/40">
-                
-                <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-5 relative z-10 flex items-start gap-3 sm:gap-4 text-text-primary group-hover:text-accent-primary transition-colors duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
-                  <span className="mt-0.5 p-1.5 sm:p-2 rounded-lg bg-bg-main/50 border border-color shrink-0 group-hover:border-accent-primary/30 group-hover:bg-accent-primary/5 group-hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] group-hover:rotate-6 transition-all duration-500 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-accent-primary/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <span className="relative z-10">{project.icon}</span>
-                  </span>
-                  <span className="group-hover:translate-x-2 transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] leading-tight text-sm sm:text-base md:text-lg">{project.title}</span>
-                </h3>
-                
-                <div className="mb-4 sm:mb-5 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-75 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
-                  <span className="text-[0.6rem] sm:text-[0.65rem] font-bold text-accent-primary/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent-primary animate-pulse"></span>
-                    Problem Overview
-                  </span>
-                  <p className="text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] text-text-secondary leading-relaxed">{project.problem}</p>
-                </div>
-                
-                <div className="mb-4 sm:mb-5 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-100 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
-                  <span className="text-[0.6rem] sm:text-[0.65rem] font-bold text-accent-purple/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent-purple animate-pulse"></span>
-                    Architecture
-                  </span>
-                  <div className="bg-bg-main border border-color rounded-lg p-2.5 sm:p-3 md:p-3.5 text-[0.75rem] sm:text-[0.8rem] md:text-[0.85rem] font-mono text-text-secondary/90 group-hover:border-accent-purple/20 group-hover:bg-accent-purple/5 transition-all duration-500 leading-relaxed shadow-inner relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-accent-purple/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <span className="relative z-10">{project.architecture}</span>
+        {/* Projects Cards Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+          {projects.map((project, index) => {
+            const currentTab = activeTabs[index] || 'overview';
+
+            return (
+              <SpotlightCard 
+                key={index} 
+                className="group flex flex-col rounded-2xl overflow-hidden relative border border-border-color hover:border-accent-primary/40 transition-all duration-300 bg-main/50"
+              >
+                {/* Window Control Header */}
+                <div className="bg-[#111827] border-b border-border-color px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+                    <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+                    <span className="ml-2 font-mono text-xs text-text-tertiary hidden sm:inline">{project.filename}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                     <a 
+                       href={project.githubLink} 
+                       target="_blank" 
+                       rel="noreferrer" 
+                       className="text-text-tertiary hover:text-accent-primary transition-colors flex items-center gap-1 font-mono text-xs"
+                     >
+                       <Github size={14} /> Repository
+                     </a>
+                     <a 
+                       href={project.githubLink} 
+                       target="_blank" 
+                       rel="noreferrer" 
+                       className="text-text-tertiary hover:text-accent-primary transition-colors"
+                     >
+                       <ExternalLink size={14} />
+                     </a>
                   </div>
                 </div>
-                
-                <div className="mb-6 sm:mb-8 flex-1 relative z-10 group-hover:translate-x-2 transition-transform duration-500 delay-150 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
-                  <span className="text-[0.6rem] sm:text-[0.65rem] font-bold text-accent-green/80 uppercase tracking-[0.2em] mb-2 block flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent-green animate-pulse"></span>
-                    Deployment Strategy
-                  </span>
-                  <p className="text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] text-text-secondary leading-relaxed">{project.deployment}</p>
+
+                {/* Main Card Content */}
+                <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
+                  
+                  {/* Title & Icon Header */}
+                  <div>
+                    <h3 className="text-lg font-bold text-text-primary flex items-start gap-3 mb-4">
+                      <span className="p-2 rounded-xl bg-accent-primary/10 border border-accent-primary/30 shrink-0">
+                        {project.icon}
+                      </span>
+                      <span className="leading-snug">{project.title}</span>
+                    </h3>
+
+                    {/* Interactive Tab Switcher */}
+                    <div className="flex rounded-xl bg-[#0b0f19] p-1 border border-border-color font-mono text-xs">
+                      <button
+                        onClick={() => setTab(index, 'overview')}
+                        className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all ${
+                          currentTab === 'overview'
+                            ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30 shadow-sm'
+                            : 'text-text-tertiary hover:text-text-primary'
+                        }`}
+                      >
+                        Architecture
+                      </button>
+                      <button
+                        onClick={() => setTab(index, 'code')}
+                        className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all ${
+                          currentTab === 'code'
+                            ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30 shadow-sm'
+                            : 'text-text-tertiary hover:text-text-primary'
+                        }`}
+                      >
+                        IaC / Code Snippet
+                      </button>
+                      <button
+                        onClick={() => setTab(index, 'security')}
+                        className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all ${
+                          currentTab === 'security'
+                            ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30 shadow-sm'
+                            : 'text-text-tertiary hover:text-text-primary'
+                        }`}
+                      >
+                        DevSecOps
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Tab Body View (Consistent Height) */}
+                  <div className="min-h-[200px] flex flex-col justify-center">
+                    
+                    {/* TAB 1: ARCHITECTURE OVERVIEW */}
+                    {currentTab === 'overview' && (
+                      <div className="space-y-4 animate-fade-in">
+                        <div>
+                          <span className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider block mb-1">
+                            PROBLEM & OVERVIEW
+                          </span>
+                          <p className="text-xs text-text-secondary leading-relaxed">{project.problem}</p>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider block mb-1">
+                            SYSTEM ARCHITECTURE
+                          </span>
+                          <div className="bg-[#0b0f19] border border-border-color rounded-xl p-3 text-xs font-mono text-emerald-400">
+                            {project.architecture}
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider block mb-1">
+                            DEPLOYMENT STRATEGY
+                          </span>
+                          <p className="text-xs text-text-secondary">{project.deployment}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TAB 2: CODE / IaC SNIPPET */}
+                    {currentTab === 'code' && (
+                      <div className="space-y-2 animate-fade-in font-mono">
+                        <div className="flex items-center justify-between text-[11px] text-text-tertiary">
+                          <span className="flex items-center gap-1.5">
+                            <FileCode size={13} className="text-accent-primary" /> Highlighted Source Code / IaC
+                          </span>
+                          <button
+                            onClick={() => copyCode(project.codeSnippet, index)}
+                            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-secondary hover:bg-white/10 text-text-secondary hover:text-accent-primary border border-border-color transition-colors"
+                          >
+                            {copiedCodeIndex === index ? (
+                              <>
+                                <Check size={12} className="text-emerald-400" /> Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy size={12} /> Copy Code
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <div className="bg-[#0d1117] border border-[#30363d] rounded-xl p-3 text-[11px] leading-relaxed text-emerald-400 overflow-x-auto max-h-[190px]">
+                          <pre>{project.codeSnippet}</pre>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TAB 3: DEVSECOPS CONTROLS */}
+                    {currentTab === 'security' && (
+                      <div className="space-y-3 animate-fade-in font-mono">
+                        <div className="text-[11px] text-text-tertiary flex items-center gap-1.5">
+                          <ShieldCheck size={14} className="text-emerald-400" /> Security & Compliance Controls:
+                        </div>
+                        <div className="space-y-2">
+                          {project.securityControls.map((sec, i) => (
+                            <div key={i} className="text-xs text-text-secondary flex items-start gap-2 bg-[#0b0f19] p-3 rounded-xl border border-border-color">
+                              <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                              <span>{sec}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* Tech Stack Footer */}
+                  <div className="flex flex-wrap gap-1.5 pt-4 border-t border-border-color">
+                    {project.techStack.map((tech, idx) => (
+                      <span 
+                        key={idx} 
+                        className="text-[10px] font-mono uppercase bg-[#0b0f19] text-text-secondary px-2.5 py-1 rounded-lg border border-border-color font-semibold"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
                 </div>
-                
-                <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-auto pt-4 sm:pt-5 border-t border-color relative z-10">
-                  {project.techStack.map((tech, idx) => (
-                    <span 
-                      key={idx} 
-                      className="text-[0.65rem] sm:text-[0.7rem] font-bold tracking-wide uppercase bg-bg-tertiary text-text-secondary px-2 sm:px-3 py-1 sm:py-1.5 rounded border border-color hover:scale-110 group-hover:border-accent-primary/30 group-hover:bg-accent-primary/5 group-hover:text-accent-primary transition-all duration-500 cursor-default flex items-center gap-1.5 shadow-sm hover:shadow-md relative overflow-hidden"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-accent-primary/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent-primary/60 group-hover:bg-accent-primary group-hover:animate-pulse relative z-10"></span>
-                      <span className="relative z-10">{tech}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </SpotlightCard>
-          ))}
+              </SpotlightCard>
+            );
+          })}
         </div>
         
-        <div className="mt-8 md:mt-10 lg:mt-12 text-center animate-scale-in px-4">
-           <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="btn btn-outline inline-flex items-center gap-2 hover-lift hover-glow group text-sm sm:text-base">
-             View Complete GitHub Profile <Github size={14} className="sm:size-16 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300" />
+        {/* GitHub Button */}
+        <div className="text-center">
+           <a 
+             href="https://github.com/lalitpunjabi" 
+             target="_blank" 
+             rel="noreferrer" 
+             className="btn btn-outline inline-flex items-center gap-2 font-mono text-xs px-6 py-3"
+           >
+             View Complete Repositories on GitHub <Github size={15} />
            </a>
         </div>
       </div>

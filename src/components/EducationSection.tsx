@@ -7,7 +7,7 @@ export default function EducationSection() {
       institution: 'Arya College of Engineering & IT',
       affiliation: 'Affiliated to Rajasthan Technical University',
       degree: 'Bachelor of Technology (Artificial Intelligence & Data Science)',
-      score: '9.42 CGPA Till 5th Semester',
+      score: '9.43 CGPA Till 5th Semester',
       duration: 'August 2023 - May 2027'
     },
     {

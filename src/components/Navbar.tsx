@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Github, Linkedin } from 'lucide-react';
+import { Menu, X, Search, Palette, Github, Linkedin } from 'lucide-react';
 
-export default function Navbar() {
+interface NavbarProps {
+  onOpenPalette?: () => void;
+  currentTheme: string;
+  onThemeChange: (theme: string) => void;
+}
+
+export default function Navbar({ onOpenPalette, currentTheme, onThemeChange }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,79 +46,157 @@ export default function Navbar() {
   const navItems = [
     { id: 'about', label: 'About' },
     { id: 'experience', label: 'Experience' },
-    { id: 'education', label: 'Education' },
+    { id: 'devops-lab', label: 'DevOps Lab' },
     { id: 'tech-stack', label: 'Tech Stack' },
     { id: 'projects', label: 'Projects' },
     { id: 'certifications', label: 'Certifications' },
   ];
 
+  const themes = [
+    { id: 'cyan', label: 'Cyberpunk Cyan', color: '#00E5FF' },
+    { id: 'matrix', label: 'Matrix Green', color: '#00FF66' },
+    { id: 'nord', label: 'Nord Dark', color: '#88C0D0' },
+    { id: 'tokyonight', label: 'Tokyo Night', color: '#7AA2F7' }
+  ];
+
   return (
-    <header className={`navbar ${scrolled ? 'navbar-scrolled py-2' : 'py-4'}`} style={{ transition: 'all 0.3s ease' }}>
+    <header className={`fixed top-0 inset-x-0 h-16 sm:h-20 z-50 transition-all duration-300 ${
+      scrolled ? 'bg-[#0b0f19]/95 backdrop-blur-md border-b border-white/10 shadow-2xl' : 'bg-[#0b0f19]/85 backdrop-blur-sm'
+    }`}>
       {/* Scroll Progress Bar */}
-      <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }}></div>
-      <div className="container nav-container relative z-50 px-4 md:px-6 lg:px-8">
-        <a href="#" className="nav-logo hover:scale-105 transition-transform duration-300 group">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-accent-primary font-bold text-xl sm:text-2xl tracking-tight drop-shadow-[0_0_10px_rgba(236,72,153,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(236,72,153,0.6)] transition-all duration-300 inline-block">&lt;LP /&gt;</span>
+      <div 
+        className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-accent-primary via-purple-500 to-pink-500 transition-all duration-150 z-50 shadow-[0_0_10px_rgba(0,229,255,0.8)]" 
+        style={{ width: `${scrollProgress}%` }}
+      />
+      
+      <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        
+        {/* Brand Name Logo */}
+        <a href="#" className="flex items-center gap-2 group shrink-0">
+          <span className="text-white font-bold tracking-wider text-base sm:text-lg lg:text-xl font-sans group-hover:text-accent-primary transition-colors">
+            LALIT PUNJABI
+          </span>
         </a>
 
-        <nav className="desktop-nav hidden md:block">
-          <ul className="nav-links">
-            {navItems.map((item) => (
-              <li key={item.id}>
-                <a 
-                  href={`#${item.id}`} 
-                  className={`relative px-2 py-1 transition-all duration-300 group ${activeSection === item.id ? 'text-accent-primary font-semibold' : 'text-text-secondary hover:text-text-primary'}`}
-                >
-                  <span className="capitalize text-sm lg:text-base">{item.label}</span>
-                  {activeSection === item.id && (
-                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-accent-primary rounded-full shadow-[0_0_8px_rgba(0,229,255,0.8)] animate-pulse"></span>
-                  )}
-                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-accent-primary to-purple-400 group-hover:w-full transition-all duration-500 opacity-0 group-hover:opacity-100 rounded-full"></span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          
-          <div className="nav-socials gap-2 lg:gap-3">
-            <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="social-icon hover:scale-110 hover:rotate-12 transition-all duration-300">
-              <Github size={16} className="lg:size-18" />
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center justify-center gap-3 lg:gap-5 text-xs font-medium">
+          {navItems.map((item) => (
+            <a 
+              key={item.id}
+              href={`#${item.id}`} 
+              style={{ display: 'inline-block', margin: '0 6px', padding: '6px 12px' }}
+              className={`rounded-full transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                activeSection === item.id 
+                  ? 'text-accent-primary font-bold bg-accent-primary/10 border border-accent-primary/30' 
+                  : 'text-gray-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              {item.label}
             </a>
-            <a href="https://www.linkedin.com/in/lalit-punjabi-443911312/" target="_blank" rel="noreferrer" className="social-icon hover:scale-110 hover:-rotate-12 transition-all duration-300">
-              <Linkedin size={16} className="lg:size-18" />
-            </a>
-            <a href="#contact" className="btn btn-primary btn-sm hover-lift hover-glow text-xs lg:text-sm">Contact Me</a>
-          </div>
+          ))}
         </nav>
 
-        <button 
-          className="mobile-menu-btn hover:scale-110 transition-transform duration-300 md:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X size={20} className="sm:size-24" /> : <Menu size={20} className="sm:size-24" />}
-        </button>
+        {/* Right Tools & Resume CTA */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          
+          {/* Command Palette Button */}
+          {onOpenPalette && (
+            <button
+              onClick={onOpenPalette}
+              className="px-3 py-1.5 rounded-full bg-[#161b22] hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white font-mono text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Open Command Palette (Ctrl + K)"
+            >
+              <Search size={14} className="text-accent-primary" />
+              <span className="hidden sm:inline font-semibold">⌘K</span>
+            </button>
+          )}
+
+          {/* Theme Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
+              className="p-2 rounded-full bg-[#161b22] hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white transition-all cursor-pointer"
+              title="Switch Color Theme"
+            >
+              <Palette size={15} />
+            </button>
+
+            {themeDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#0f141d] border border-white/10 shadow-2xl p-2 z-50 space-y-1 font-mono text-xs">
+                <div className="text-[10px] text-gray-400 px-2 py-1 uppercase tracking-wider font-semibold">Select Theme</div>
+                {themes.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      onThemeChange(t.id);
+                      setThemeDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all text-left ${
+                      currentTheme === t.id ? 'bg-accent-primary/15 text-accent-primary font-bold' : 'text-gray-300 hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: t.color }}></span>
+                    <span className="text-[11px] truncate">{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white hidden sm:flex transition-colors" aria-label="GitHub">
+            <Github size={18} />
+          </a>
+          <a href="https://www.linkedin.com/in/lalit-punjabi-443911312/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white hidden sm:flex transition-colors" aria-label="LinkedIn">
+            <Linkedin size={18} />
+          </a>
+
+          <a 
+            href="#contact" 
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-105"
+          >
+            Contact Me
+          </a>
+
+          {/* Mobile Menu Button */}
+          <button 
+            className="p-2 text-gray-300 hover:text-white lg:hidden rounded-lg bg-[#161b22] border border-white/10"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="mobile-menu animate-slide-down-fade backdrop-blur-xl bg-bg-main/95 absolute top-full left-0 w-full border-t border-color shadow-lg md:hidden">
-          <nav className="px-4 py-6">
-            <ul className="mobile-nav-links space-y-4">
-              {navItems.map((item) => (
-                <li key={item.id} className="group">
-                  <a href={`#${item.id}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 group-hover:translate-x-2 transition-all duration-300 text-text-secondary hover:text-text-primary">
-                    <span className="w-0 h-[2px] bg-gradient-to-r from-accent-primary to-purple-400 group-hover:w-4 transition-all duration-300"></span>
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <div className="mobile-nav-socials flex justify-center gap-4 mb-6 mt-6">
-              <a href="https://github.com/lalitpunjabi" target="_blank" rel="noreferrer" className="hover:scale-125 hover:text-accent-primary transition-all duration-300"><Github size={20} /></a>
-              <a href="https://www.linkedin.com/in/lalit-punjabi-443911312/" target="_blank" rel="noreferrer" className="hover:scale-125 hover:text-accent-primary transition-all duration-300"><Linkedin size={20} /></a>
-            </div>
-            <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="btn btn-primary btn-block hover-lift hover-glow w-full">Contact Me</a>
-          </nav>
+        <div className="md:hidden animate-slide-down-fade backdrop-blur-2xl bg-[#0b0f19]/98 border-b border-white/10 shadow-2xl px-6 py-6 font-sans text-sm space-y-4">
+          <div className="space-y-3">
+            {navItems.map((item) => (
+              <a 
+                key={item.id}
+                href={`#${item.id}`} 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block py-1.5 text-gray-300 hover:text-accent-primary font-medium"
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+
+          <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (onOpenPalette) onOpenPalette();
+              }}
+              className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300 flex items-center gap-2"
+            >
+              <Search size={14} /> Quick Palette (Ctrl+K)
+            </button>
+            <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="btn btn-primary text-xs px-4 py-2">Contact Me</a>
+          </div>
         </div>
       )}
     </header>
