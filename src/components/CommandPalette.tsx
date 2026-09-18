@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Terminal, FileText, Mail, Compass, Sparkles, Check, Palette } from 'lucide-react';
+import { Search, Terminal, FileText, Mail, Compass, Sparkles, Check, Palette, Briefcase } from 'lucide-react';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -7,6 +7,8 @@ interface CommandPaletteProps {
   onOpenResume: () => void;
   currentTheme: string;
   onThemeChange: (theme: string) => void;
+  isRecruiterMode?: boolean;
+  onToggleRecruiterMode?: () => void;
 }
 
 export default function CommandPalette({
@@ -14,7 +16,9 @@ export default function CommandPalette({
   onClose,
   onOpenResume,
   currentTheme,
-  onThemeChange
+  onThemeChange,
+  isRecruiterMode = false,
+  onToggleRecruiterMode
 }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const [copied, setCopied] = useState(false);
@@ -23,11 +27,12 @@ export default function CommandPalette({
   const sections = [
     { id: 'about', name: 'About & Bio', icon: <Compass size={16} /> },
     { id: 'experience', name: 'Work Experience', icon: <Terminal size={16} /> },
-    { id: 'education', name: 'Education & Degree', icon: <Compass size={16} /> },
+    { id: 'projects', name: 'Production Projects & Case Studies', icon: <FileText size={16} /> },
     { id: 'devops-lab', name: 'CI/CD & Cloud Lab Visualizer', icon: <Terminal size={16} /> },
-    { id: 'tech-stack', name: 'DevOps Tech Stack', icon: <Sparkles size={16} /> },
-    { id: 'projects', name: 'Production Projects', icon: <FileText size={16} /> },
+    { id: 'infrastructure', name: 'Portfolio DevOps Infrastructure', icon: <Terminal size={16} /> },
+    { id: 'tech-stack', name: 'DevOps Tech Stack & Skills', icon: <Sparkles size={16} /> },
     { id: 'certifications', name: 'Red Hat & Cloud Certifications', icon: <Check size={16} /> },
+    { id: 'education', name: 'Education & Academic Record', icon: <Compass size={16} /> },
     { id: 'contact', name: 'Contact & Hiring', icon: <Mail size={16} /> },
   ];
 
@@ -101,7 +106,7 @@ export default function CommandPalette({
           <Search size={18} className="text-accent-primary mr-3 shrink-0 animate-pulse" />
           <input
             type="text"
-            placeholder="Search sections or commands... (e.g. projects, lab, resume, theme)"
+            placeholder="Search sections or commands... (e.g. projects, lab, recruiter, resume)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
@@ -116,7 +121,24 @@ export default function CommandPalette({
           {/* Quick Actions */}
           <div>
             <div className="text-[11px] font-mono text-text-tertiary mb-2 font-semibold uppercase tracking-wider">Quick Actions</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {onToggleRecruiterMode && (
+                <button
+                  onClick={() => { onClose(); onToggleRecruiterMode(); }}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[#161b22] hover:bg-amber-500/15 border border-border-color hover:border-amber-500/40 text-left transition-all text-xs text-text-primary group"
+                >
+                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
+                    {isRecruiterMode ? <Briefcase size={16} /> : <Terminal size={16} />}
+                  </div>
+                  <div>
+                    <div className="font-semibold group-hover:text-amber-400">
+                      {isRecruiterMode ? 'Switch to Dev View' : 'Recruiter Mode (30s)'}
+                    </div>
+                    <div className="text-[10px] text-text-tertiary font-mono">Toggle Portfolio Mode</div>
+                  </div>
+                </button>
+              )}
+
               <button
                 onClick={() => { onClose(); onOpenResume(); }}
                 className="flex items-center gap-3 p-3 rounded-xl bg-[#161b22] hover:bg-accent-primary/15 border border-border-color hover:border-accent-primary/40 text-left transition-all text-xs text-text-primary group"
@@ -139,7 +161,7 @@ export default function CommandPalette({
                 </div>
                 <div>
                   <div className="font-semibold group-hover:text-accent-primary">
-                    {copied ? '✓ Email Copied!' : 'Copy Email Address'}
+                    {copied ? '✓ Email Copied!' : 'Copy Email'}
                   </div>
                   <div className="text-[10px] text-text-tertiary font-mono">lalitpunjabi.pro@gmail.com</div>
                 </div>
@@ -214,3 +236,4 @@ export default function CommandPalette({
     </div>
   );
 }
+

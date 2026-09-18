@@ -1,4 +1,8 @@
-export default function AboutSection() {
+interface AboutSectionProps {
+  isRecruiterMode?: boolean;
+}
+
+export default function AboutSection({ isRecruiterMode = false }: AboutSectionProps) {
 
   return (
     <section id="about" className="section relative pb-12 md:pb-16 lg:pb-20 overflow-hidden px-4 md:px-6 lg:px-8">
@@ -9,10 +13,14 @@ export default function AboutSection() {
       <div className="container relative z-10">
         <div className="text-center mb-8 md:mb-10 lg:mb-12 animate-slide-up-fade">
           <h2 className="section-title inline-block relative group text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-            About Me
+            {isRecruiterMode ? 'Executive Summary' : 'About Me'}
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-accent-primary via-purple-500 to-pink-500 group-hover:w-full transition-all duration-700 shadow-[0_0_20px_rgba(0,229,255,0.6)]"></div>
           </h2>
-          <p className="text-text-secondary mt-4 text-base sm:text-lg max-w-2xl mx-auto px-2">Passionate DevOps Engineer building scalable cloud infrastructure</p>
+          <p className="text-text-secondary mt-4 text-base sm:text-lg max-w-2xl mx-auto px-2">
+            {isRecruiterMode 
+              ? 'High-impact DevOps & Cloud Engineer with proven automation credentials and academic excellence.' 
+              : 'Passionate DevOps Engineer building scalable cloud infrastructure and automated delivery systems'}
+          </p>
         </div>
         
         <div className="glass-panel p-4 sm:p-6 md:p-8 lg:p-12 rounded-xl sm:rounded-2xl relative overflow-hidden mb-12 md:mb-16 shadow-card border border-color hover:border-accent-primary/40 transition-all duration-500 animate-scale-in tech-border group">
@@ -49,8 +57,8 @@ export default function AboutSection() {
           </div>
         </div>
 
-
       </div>
     </section>
   );
 }
+

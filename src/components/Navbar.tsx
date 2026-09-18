@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Search, Palette, Github, Linkedin } from 'lucide-react';
+import { Menu, X, Search, Palette, Github, Linkedin, Briefcase, Terminal, FileText } from 'lucide-react';
 
 interface NavbarProps {
   onOpenPalette?: () => void;
   currentTheme: string;
   onThemeChange: (theme: string) => void;
+  isRecruiterMode?: boolean;
+  onToggleRecruiterMode?: () => void;
+  onOpenResume?: () => void;
 }
 
-export default function Navbar({ onOpenPalette, currentTheme, onThemeChange }: NavbarProps) {
+export default function Navbar({ 
+  onOpenPalette, 
+  currentTheme, 
+  onThemeChange,
+  isRecruiterMode = false,
+  onToggleRecruiterMode,
+  onOpenResume
+}: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
@@ -43,14 +53,24 @@ export default function Navbar({ onOpenPalette, currentTheme, onThemeChange }: N
     };
   }, []);
 
-  const navItems = [
-    { id: 'about', label: 'About' },
-    { id: 'experience', label: 'Experience' },
-    { id: 'devops-lab', label: 'DevOps Lab' },
-    { id: 'tech-stack', label: 'Tech Stack' },
-    { id: 'projects', label: 'Projects' },
-    { id: 'certifications', label: 'Certifications' },
-  ];
+  const navItems = isRecruiterMode 
+    ? [
+        { id: 'about', label: 'Summary' },
+        { id: 'experience', label: 'Experience' },
+        { id: 'projects', label: 'Projects' },
+        { id: 'tech-stack', label: 'Skills' },
+        { id: 'certifications', label: 'Certifications' },
+        { id: 'contact', label: 'Contact' }
+      ]
+    : [
+        { id: 'about', label: 'About' },
+        { id: 'experience', label: 'Experience' },
+        { id: 'projects', label: 'Projects' },
+        { id: 'devops-lab', label: 'DevOps Lab' },
+        { id: 'infrastructure', label: 'Infrastructure' },
+        { id: 'tech-stack', label: 'Tech Stack' },
+        { id: 'certifications', label: 'Certifications' },
+      ];
 
   const themes = [
     { id: 'cyan', label: 'Cyberpunk Cyan', color: '#00E5FF' },
@@ -63,7 +83,7 @@ export default function Navbar({ onOpenPalette, currentTheme, onThemeChange }: N
     <header className={`fixed top-0 inset-x-0 h-16 sm:h-20 z-50 transition-all duration-300 ${
       scrolled ? 'bg-[#0b0f19]/95 backdrop-blur-md border-b border-white/10 shadow-2xl' : 'bg-[#0b0f19]/85 backdrop-blur-sm'
     }`}>
-      {/* Scroll Progress Bar */}
+      {/* Top Scroll Progress Bar */}
       <div 
         className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-accent-primary via-purple-500 to-pink-500 transition-all duration-150 z-50 shadow-[0_0_10px_rgba(0,229,255,0.8)]" 
         style={{ width: `${scrollProgress}%` }}
@@ -76,15 +96,18 @@ export default function Navbar({ onOpenPalette, currentTheme, onThemeChange }: N
           <span className="text-white font-bold tracking-wider text-base sm:text-lg lg:text-xl font-sans group-hover:text-accent-primary transition-colors">
             LALIT PUNJABI
           </span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-accent-primary/10 text-accent-primary border border-accent-primary/30 hidden sm:inline-block">
+            {isRecruiterMode ? 'Recruiter Mode' : 'DevOps'}
+          </span>
         </a>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center justify-center gap-3 lg:gap-5 text-xs font-medium">
+        <nav className="hidden md:flex items-center justify-center gap-1.5 lg:gap-3 text-xs font-medium">
           {navItems.map((item) => (
             <a 
               key={item.id}
               href={`#${item.id}`} 
-              style={{ display: 'inline-block', margin: '0 6px', padding: '6px 12px' }}
+              style={{ display: 'inline-block', margin: '0 4px', padding: '6px 12px' }}
               className={`rounded-full transition-all duration-200 cursor-pointer whitespace-nowrap ${
                 activeSection === item.id 
                   ? 'text-accent-primary font-bold bg-accent-primary/10 border border-accent-primary/30' 
@@ -99,6 +122,22 @@ export default function Navbar({ onOpenPalette, currentTheme, onThemeChange }: N
         {/* Right Tools & Resume CTA */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
+          {/* Recruiter / Developer Mode Toggle */}
+          {onToggleRecruiterMode && (
+            <button
+              onClick={onToggleRecruiterMode}
+              className={`px-3 py-1.5 rounded-full border text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer ${
+                isRecruiterMode
+                  ? 'bg-amber-500/15 text-amber-400 border-amber-500/40 font-bold'
+                  : 'bg-white/5 text-gray-300 hover:text-white border-white/10'
+              }`}
+              title={isRecruiterMode ? 'Switch to Developer Mode' : 'Switch to Recruiter Mode (30s Overview)'}
+            >
+              {isRecruiterMode ? <Briefcase size={14} /> : <Terminal size={14} />}
+              <span className="hidden lg:inline">{isRecruiterMode ? 'Recruiter' : 'Dev Mode'}</span>
+            </button>
+          )}
+
           {/* Command Palette Button */}
           {onOpenPalette && (
             <button
@@ -150,16 +189,26 @@ export default function Navbar({ onOpenPalette, currentTheme, onThemeChange }: N
             <Linkedin size={18} />
           </a>
 
-          <a 
-            href="#contact" 
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-105"
-          >
-            Contact Me
-          </a>
+          {/* Resume Button */}
+          {onOpenResume ? (
+            <button 
+              onClick={onOpenResume}
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-white bg-accent-primary/10 hover:bg-accent-primary/20 border border-accent-primary/30 text-accent-primary transition-all hover:scale-105"
+            >
+              <FileText size={14} /> Resume
+            </button>
+          ) : (
+            <a 
+              href="#contact" 
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-105"
+            >
+              Contact Me
+            </a>
+          )}
 
           {/* Mobile Menu Button */}
           <button 
-            className="p-2 text-gray-300 hover:text-white lg:hidden rounded-lg bg-[#161b22] border border-white/10"
+            className="p-2 text-gray-300 hover:text-white md:hidden rounded-lg bg-[#161b22] border border-white/10"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
           >
@@ -202,3 +251,4 @@ export default function Navbar({ onOpenPalette, currentTheme, onThemeChange }: N
     </header>
   );
 }
+

@@ -1,199 +1,89 @@
 import { useState } from 'react';
-import { ExternalLink, Github, Code2, Database, LayoutTemplate, Activity, ShieldCheck, FileCode, CheckCircle2, Copy, Check } from 'lucide-react';
+import { Github, ShieldCheck, FileCode, CheckCircle2, Copy, Check, BookOpen } from 'lucide-react';
 import SpotlightCard from './SpotlightCard';
+import { projectsData, Project } from '../data/projects';
+import ProjectCaseStudyModal from './ProjectCaseStudyModal';
 
-export default function ProjectsSection() {
-  const [activeTabs, setActiveTabs] = useState<Record<number, 'overview' | 'code' | 'security'>>({
-    0: 'overview',
-    1: 'overview',
-    2: 'overview',
-    3: 'overview'
-  });
-
-  const [copiedCodeIndex, setCopiedCodeIndex] = useState<number | null>(null);
-
-  const setTab = (index: number, tab: 'overview' | 'code' | 'security') => {
-    setActiveTabs(prev => ({ ...prev, [index]: tab }));
-  };
-
-  const copyCode = (code: string, index: number) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCodeIndex(index);
-    setTimeout(() => setCopiedCodeIndex(null), 2000);
-  };
-
-  const projects = [
-    {
-      title: 'BloodMate – Enterprise Blood Bank Management System',
-      filename: 'bloodmate_engine.java',
-      problem: 'BloodMate is a modular, MVC-architected application built using Java 17, JavaFX 21, and MySQL 8. Designed to streamline end-to-end blood bank operations, donor tracking, real-time expiration monitoring, emergency requests, and analytics reporting.',
-      architecture: 'MVC layered architecture (Controller → Service → DAO → Database) leveraging JDBC with HikariCP connection pooling.',
-      deployment: 'Event-driven UI navigation with hardware acceleration. Programmatic MySQL schema migrations and pool optimization.',
-      techStack: ['Java 17', 'JavaFX 21', 'MySQL 8', 'JDBC', 'Maven', 'CSS'],
-      githubLink: 'https://github.com/lalitpunjabi/BloodMate-Advanced',
-      icon: <Activity size={22} className="text-accent-primary" />,
-      codeSnippet: `// MySQL HikariCP Connection Pool & Schema Init
-public class DatabaseManager {
-    private static final String URL = "jdbc:mysql://localhost:3306/bloodmate_db";
-    private static HikariDataSource dataSource;
-
-    static {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(URL);
-        config.setUsername("bloodmate_app");
-        config.setMaximumPoolSize(10);
-        dataSource = new HikariDataSource(config);
-    }
-}`,
-      securityControls: [
-        'BCrypt password hashing for medical staff authentication',
-        'Strict PreparedStatement parameterization preventing SQL Injection',
-        'Role-based Access Control (Admin vs Hospital Staff)'
-      ]
-    },
-    {
-      title: 'CitySamadhan – Civic Complaint Management System',
-      filename: 'city_samadhan_app.py',
-      problem: 'CitySamadhan is a scalable full-stack web platform digitizing civic complaint resolution. Features secure user authentication with OTP verification, complaint lifecycle management, community upvoting, and department routing.',
-      architecture: 'MVC-inspired Flask architecture with ORM-backed data layer and REST endpoints. Geolocation calculations powered by GeoPy.',
-      deployment: 'RESTful API design with modular Flask blueprints. PostgreSQL-ready database modeling using SQLAlchemy ORM.',
-      techStack: ['Python', 'Flask', 'SQLAlchemy', 'PostgreSQL', 'Jinja2', 'Flask-Mail'],
-      githubLink: 'https://github.com/lalitpunjabi/CitySamadhan-Final-',
-      icon: <Database size={22} className="text-accent-primary" />,
-      codeSnippet: `# Flask SQLAlchemy ORM Complaint Endpoint
-@app.route('/api/complaints', methods=['POST'])
-@login_required
-def create_complaint():
-    data = request.get_json()
-    new_ticket = Complaint(
-        title=data['title'],
-        department=route_department(data['category']),
-        lat=data['latitude'], lon=data['longitude'],
-        user_id=current_user.id
-    )
-    db.session.add(new_ticket)
-    db.session.commit()
-    send_notification_email(current_user.email, new_ticket.id)`,
-      securityControls: [
-        'OTP email verification for valid citizen complaint reporting',
-        'CSRF token protection across Flask form endpoints',
-        'Municipal boundary sanitization via GeoPy'
-      ]
-    },
-    {
-      title: 'HoodNite – Full-Stack Nightlife Discovery Platform',
-      filename: 'Dockerfile.production',
-      problem: 'HoodNite is a modern full-stack application for discovering nightlife events, exploring venues, and managing shared expenses. Built with REST API architecture, JWT authentication, and role-based admin controls.',
-      architecture: 'Decoupled Next.js frontend & Express backend with REST API endpoints, JWT token protection, and dynamic event filtering.',
-      deployment: 'Multi-stage Docker containerization on Alpine Linux. Containerized deployment with automated health checks.',
-      techStack: ['Next.js 14', 'React', 'Node.js', 'Express', 'MongoDB', 'JWT', 'Tailwind CSS'],
-      githubLink: 'https://github.com/lalitpunjabi/HoodNite',
-      icon: <LayoutTemplate size={22} className="text-accent-primary" />,
-      codeSnippet: `# Multi-stage Production OCI Dockerfile
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-
-FROM node:20-alpine AS runner
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-USER node
-EXPOSE 3000
-CMD ["node", "dist/server.js"]`,
-      securityControls: [
-        'Non-root container user execution (`USER node`) in Alpine',
-        'JWT Bearer token middleware on protected API routes',
-        'Express Rate Limiting (100 req/15min per client IP)'
-      ]
-    },
-    {
-      title: 'DateVibe – Romantic Date Planning Web Application',
-      filename: 'venue_context.ts',
-      problem: 'DateVibe is a frontend-focused venue discovery application delivering curated dating venue suggestions. Implements dynamic client-side filtering, wishlist management, and mock booking workflows.',
-      architecture: 'Component-driven SPA architecture with strong TypeScript type safety, Context API state isolation, and custom Tailwind styling.',
-      deployment: 'Vite build pipeline with chunk splitting and production bundle minification. Context API global state management.',
-      techStack: ['React 18', 'TypeScript', 'Vite', 'Tailwind CSS', 'React Router'],
-      githubLink: 'https://github.com/lalitpunjabi/DateVibe-AceHack',
-      icon: <Code2 size={22} className="text-accent-primary" />,
-      codeSnippet: `// Type-safe State Engine & Context Provider
-export interface Venue {
-  id: string;
-  name: string;
-  rating: number;
-  category: 'restaurant' | 'lounge' | 'outdoor';
+interface ProjectsSectionProps {
+  onSelectProject?: (project: Project) => void;
 }
 
-export const VenueContext = createContext<{
-  venues: Venue[];
-  filterCategory: (cat: string) => void;
-}>({ venues: [], filterCategory: () => {} });`,
-      securityControls: [
-        'Strict TypeScript compilation (`noImplicitAny: true`)',
-        'Sanitized client-side search input sanitization',
-        'Vite bundle tree-shaking & security audits'
-      ]
-    }
-  ];
+export default function ProjectsSection({ onSelectProject }: ProjectsSectionProps) {
+
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [activeTabs, setActiveTabs] = useState<Record<string, 'overview' | 'code' | 'security'>>({
+    deploymate: 'overview',
+    bloodmate: 'overview',
+    'cloud-infrastructure-automation': 'overview'
+  });
+
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
+
+  const setTab = (id: string, tab: 'overview' | 'code' | 'security') => {
+    setActiveTabs(prev => ({ ...prev, [id]: tab }));
+  };
+
+  const copyCode = (code: string, id: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCodeId(id);
+    setTimeout(() => setCopiedCodeId(null), 2000);
+  };
 
   return (
-    <section id="projects" className="section bg-secondary relative overflow-hidden px-4 md:px-6 lg:px-8">
+    <section id="projects" className="py-24 px-4 md:px-6 lg:px-8 bg-[#0b0f19] relative overflow-hidden border-b border-white/5">
+      
       {/* Background ambient lighting */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-accent-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent-purple/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-accent-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl" />
       </div>
       
-      <div className="container relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10">
         
         {/* Section Title */}
-        <div className="text-center mb-10 animate-slide-up-fade">
-          <h2 className="section-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
-            Production-Ready Architecture & Projects
+        <div className="text-center mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-primary/10 border border-accent-primary/30 text-accent-primary text-xs font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Engineering Case Studies
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+            Featured DevOps & Cloud Projects
           </h2>
-          <p className="text-text-secondary mt-3 text-base sm:text-lg max-w-2xl mx-auto">
-            Explore architecture blueprints, multi-stage Dockerfiles, and DevSecOps security controls.
+          <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Real enterprise projects featuring automated CI/CD security scanning, container orchestration, IaC Terraform modules, and cloud infrastructure.
           </p>
         </div>
         
         {/* Projects Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-          {projects.map((project, index) => {
-            const currentTab = activeTabs[index] || 'overview';
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {projectsData.map((project) => {
+            const currentTab = activeTabs[project.id] || 'overview';
 
             return (
               <SpotlightCard 
-                key={index} 
-                className="group flex flex-col rounded-2xl overflow-hidden relative border border-border-color hover:border-accent-primary/40 transition-all duration-300 bg-main/50"
+                key={project.id} 
+                className="group flex flex-col rounded-3xl overflow-hidden relative border border-white/10 hover:border-accent-primary/40 transition-all duration-300 bg-[#0f141d]/70 backdrop-blur-md shadow-2xl"
               >
                 {/* Window Control Header */}
-                <div className="bg-[#111827] border-b border-border-color px-4 py-3 flex items-center justify-between">
+                <div className="bg-[#161b22] border-b border-white/10 px-5 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
-                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-                    <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
-                    <span className="ml-2 font-mono text-xs text-text-tertiary hidden sm:inline">{project.filename}</span>
+                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                    <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                    <span className="ml-2 font-mono text-xs text-gray-400 font-semibold">{project.id}.yaml</span>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                     <a 
-                       href={project.githubLink} 
-                       target="_blank" 
-                       rel="noreferrer" 
-                       className="text-text-tertiary hover:text-accent-primary transition-colors flex items-center gap-1 font-mono text-xs"
-                     >
-                       <Github size={14} /> Repository
-                     </a>
-                     <a 
-                       href={project.githubLink} 
-                       target="_blank" 
-                       rel="noreferrer" 
-                       className="text-text-tertiary hover:text-accent-primary transition-colors"
-                     >
-                       <ExternalLink size={14} />
-                     </a>
+                  <div className="flex items-center gap-3 font-mono text-xs">
+                    {project.githubUrl && (
+                      <a 
+                        href={project.githubUrl} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="text-gray-400 hover:text-accent-primary transition-colors flex items-center gap-1"
+                      >
+                        <Github size={14} /> Repository
+                      </a>
+                    )}
                   </div>
                 </div>
 
@@ -201,42 +91,58 @@ export const VenueContext = createContext<{
                 <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
                   
                   {/* Title & Icon Header */}
-                  <div>
-                    <h3 className="text-lg font-bold text-text-primary flex items-start gap-3 mb-4">
-                      <span className="p-2 rounded-xl bg-accent-primary/10 border border-accent-primary/30 shrink-0">
-                        {project.icon}
-                      </span>
-                      <span className="leading-snug">{project.title}</span>
-                    </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-accent-primary font-bold block mb-1">
+                          {project.category}
+                        </span>
+                        <h3 className="text-xl font-extrabold text-white tracking-tight group-hover:text-accent-primary transition-colors">
+                          {project.name}
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => onSelectProject ? onSelectProject(project) : setSelectedProject(project)}
+                        className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-accent-primary/20 border border-white/10 hover:border-accent-primary/40 text-xs font-mono text-gray-300 hover:text-accent-primary flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+                        title="View Full Case Study"
+                      >
+
+                        <BookOpen size={13} /> Case Study
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-gray-300 leading-relaxed font-medium">
+                      {project.tagline}
+                    </p>
 
                     {/* Interactive Tab Switcher */}
-                    <div className="flex rounded-xl bg-[#0b0f19] p-1 border border-border-color font-mono text-xs">
+                    <div className="flex rounded-xl bg-[#0b0f19] p-1 border border-white/10 font-mono text-xs">
                       <button
-                        onClick={() => setTab(index, 'overview')}
+                        onClick={() => setTab(project.id, 'overview')}
                         className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all ${
                           currentTab === 'overview'
                             ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30 shadow-sm'
-                            : 'text-text-tertiary hover:text-text-primary'
+                            : 'text-gray-400 hover:text-white'
                         }`}
                       >
                         Architecture
                       </button>
                       <button
-                        onClick={() => setTab(index, 'code')}
+                        onClick={() => setTab(project.id, 'code')}
                         className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all ${
                           currentTab === 'code'
                             ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30 shadow-sm'
-                            : 'text-text-tertiary hover:text-text-primary'
+                            : 'text-gray-400 hover:text-white'
                         }`}
                       >
-                        IaC / Code Snippet
+                        IaC / Code
                       </button>
                       <button
-                        onClick={() => setTab(index, 'security')}
+                        onClick={() => setTab(project.id, 'security')}
                         className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all ${
                           currentTab === 'security'
                             ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30 shadow-sm'
-                            : 'text-text-tertiary hover:text-text-primary'
+                            : 'text-gray-400 hover:text-white'
                         }`}
                       >
                         DevSecOps
@@ -245,74 +151,81 @@ export const VenueContext = createContext<{
                   </div>
 
                   {/* Tab Body View (Consistent Height) */}
-                  <div className="min-h-[200px] flex flex-col justify-center">
+                  <div className="min-h-[190px] flex flex-col justify-center">
                     
                     {/* TAB 1: ARCHITECTURE OVERVIEW */}
                     {currentTab === 'overview' && (
-                      <div className="space-y-4 animate-fade-in">
+                      <div className="space-y-4 animate-fade-in text-xs">
                         <div>
-                          <span className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider block mb-1">
-                            PROBLEM & OVERVIEW
+                          <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block mb-1">
+                            PROBLEM STATEMENT
                           </span>
-                          <p className="text-xs text-text-secondary leading-relaxed">{project.problem}</p>
+                          <p className="text-gray-300 leading-relaxed">{project.problem}</p>
                         </div>
 
                         <div>
-                          <span className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider block mb-1">
-                            SYSTEM ARCHITECTURE
+                          <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block mb-1">
+                            ENGINEERING HIGHLIGHTS
                           </span>
-                          <div className="bg-[#0b0f19] border border-border-color rounded-xl p-3 text-xs font-mono text-emerald-400">
-                            {project.architecture}
-                          </div>
-                        </div>
-
-                        <div>
-                          <span className="text-[10px] font-mono text-text-tertiary uppercase tracking-wider block mb-1">
-                            DEPLOYMENT STRATEGY
-                          </span>
-                          <p className="text-xs text-text-secondary">{project.deployment}</p>
+                          <ul className="space-y-1.5">
+                            {project.highlights.slice(0, 3).map((h, i) => (
+                              <li key={i} className="flex items-start gap-2 text-gray-300">
+                                <CheckCircle2 size={13} className="text-emerald-400 shrink-0 mt-0.5" />
+                                <span>{h}</span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       </div>
                     )}
 
                     {/* TAB 2: CODE / IaC SNIPPET */}
                     {currentTab === 'code' && (
-                      <div className="space-y-2 animate-fade-in font-mono">
-                        <div className="flex items-center justify-between text-[11px] text-text-tertiary">
+                      <div className="space-y-2 animate-fade-in font-mono text-xs">
+                        <div className="flex items-center justify-between text-[11px] text-gray-400">
                           <span className="flex items-center gap-1.5">
-                            <FileCode size={13} className="text-accent-primary" /> Highlighted Source Code / IaC
+                            <FileCode size={13} className="text-accent-primary" /> 
+                            {project.caseStudy.codeSnippet ? project.caseStudy.codeSnippet.filename : 'architecture.yaml'}
                           </span>
-                          <button
-                            onClick={() => copyCode(project.codeSnippet, index)}
-                            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-secondary hover:bg-white/10 text-text-secondary hover:text-accent-primary border border-border-color transition-colors"
-                          >
-                            {copiedCodeIndex === index ? (
-                              <>
-                                <Check size={12} className="text-emerald-400" /> Copied!
-                              </>
-                            ) : (
-                              <>
-                                <Copy size={12} /> Copy Code
-                              </>
-                            )}
-                          </button>
+                          {project.caseStudy.codeSnippet && (
+                            <button
+                              onClick={() => copyCode(project.caseStudy.codeSnippet!.code, project.id)}
+                              className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-gray-300 hover:text-accent-primary border border-white/10 transition-colors"
+                            >
+                              {copiedCodeId === project.id ? (
+                                <>
+                                  <Check size={12} className="text-emerald-400" /> Copied!
+                                </>
+                              ) : (
+                                <>
+                                  <Copy size={12} /> Copy Code
+                                </>
+                              )}
+                            </button>
+                          )}
                         </div>
-                        <div className="bg-[#0d1117] border border-[#30363d] rounded-xl p-3 text-[11px] leading-relaxed text-emerald-400 overflow-x-auto max-h-[190px]">
-                          <pre>{project.codeSnippet}</pre>
+                        <div className="bg-[#0b0f19] border border-white/10 rounded-xl p-3 text-[11px] leading-relaxed text-emerald-400 overflow-x-auto max-h-[160px]">
+                          <pre>
+                            <code>
+                              {project.caseStudy.codeSnippet 
+                                ? project.caseStudy.codeSnippet.code 
+                                : `# ${project.name} Architecture Topology\n${project.caseStudy.architectureDescription}`}
+                            </code>
+                          </pre>
                         </div>
                       </div>
                     )}
 
                     {/* TAB 3: DEVSECOPS CONTROLS */}
                     {currentTab === 'security' && (
-                      <div className="space-y-3 animate-fade-in font-mono">
-                        <div className="text-[11px] text-text-tertiary flex items-center gap-1.5">
-                          <ShieldCheck size={14} className="text-emerald-400" /> Security & Compliance Controls:
+                      <div className="space-y-3 animate-fade-in font-mono text-xs">
+                        <div className="text-[11px] text-gray-400 flex items-center gap-1.5">
+                          <ShieldCheck size={14} className="text-purple-400" /> Security & Compliance Controls:
                         </div>
                         <div className="space-y-2">
-                          {project.securityControls.map((sec, i) => (
-                            <div key={i} className="text-xs text-text-secondary flex items-start gap-2 bg-[#0b0f19] p-3 rounded-xl border border-border-color">
-                              <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                          {project.caseStudy.securityControls.map((sec, i) => (
+                            <div key={i} className="text-xs text-gray-300 flex items-start gap-2 bg-[#0b0f19] p-2.5 rounded-xl border border-white/10">
+                              <CheckCircle2 size={14} className="text-purple-400 shrink-0 mt-0.5" />
                               <span>{sec}</span>
                             </div>
                           ))}
@@ -322,12 +235,12 @@ export const VenueContext = createContext<{
 
                   </div>
 
-                  {/* Tech Stack Footer */}
-                  <div className="flex flex-wrap gap-1.5 pt-4 border-t border-border-color">
-                    {project.techStack.map((tech, idx) => (
+                  {/* Tech Stack Footer Chips */}
+                  <div className="flex flex-wrap gap-1.5 pt-4 border-t border-white/10">
+                    {project.technologies.map((tech, idx) => (
                       <span 
                         key={idx} 
-                        className="text-[10px] font-mono uppercase bg-[#0b0f19] text-text-secondary px-2.5 py-1 rounded-lg border border-border-color font-semibold"
+                        className="text-[10px] font-mono bg-[#0b0f19] text-gray-300 px-2.5 py-1 rounded-lg border border-white/10 font-semibold"
                       >
                         {tech}
                       </span>
@@ -340,18 +253,26 @@ export const VenueContext = createContext<{
           })}
         </div>
         
-        {/* GitHub Button */}
+        {/* GitHub Direct Link Button */}
         <div className="text-center">
-           <a 
-             href="https://github.com/lalitpunjabi" 
-             target="_blank" 
-             rel="noreferrer" 
-             className="btn btn-outline inline-flex items-center gap-2 font-mono text-xs px-6 py-3"
-           >
-             View Complete Repositories on GitHub <Github size={15} />
-           </a>
+          <a 
+            href="https://github.com/lalitpunjabi" 
+            target="_blank" 
+            rel="noreferrer" 
+            className="inline-flex items-center gap-2 font-mono text-xs px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all hover:scale-105"
+          >
+            View Complete Repositories on GitHub <Github size={15} />
+          </a>
         </div>
+
       </div>
+
+      {/* Case Study Modal Popup */}
+      <ProjectCaseStudyModal 
+        project={selectedProject} 
+        onClose={() => setSelectedProject(null)} 
+      />
+
     </section>
   );
 }

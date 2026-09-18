@@ -10,14 +10,16 @@ A premium, high-performance developer portfolio built with React, Vite, and comp
 
 ## 🚀 Features
 
-*   **Vibrant Cyber-Midnight Aesthetic**: A totally custom, ultra-premium dark mode featuring deep cosmic backgrounds (`#02040a`), pulsing neon auras, and ambient mesh gradients to create a distinct, modern tech feel.
-*   **Responsive Bento Grid & Terminal UI**: Utilizes modern Bento Grid layouts for skills and Mac/Linux terminal window aesthetics for project cards, maximizing readability and developer appeal.
-*   **Dynamic Interactive Components**: 
-    *   Custom floating terminal typing effect in the Hero section.
-    *   Glassmorphism cards (`backdrop-blur-xl`) with high-saturation gradient hover states.
-    *   Interactive 'Get In Touch' simulated macOS terminal form.
+*   **Recruiter vs. Developer View Toggle**: Instantly switch between a streamlined 30-second recruiter overview and an in-depth technical developer mode with live interactive CI/CD lab simulations.
+*   **Flagship Production Case Studies**:
+    *   **DEPLOYMATE**: Intelligent Enterprise CI/CD, GitOps & AIOps Platform (Jenkins, Docker, Kubernetes, Prometheus, Grafana, Trivy).
+    *   **BloodMate**: Real-Time Emergency Blood Connect System (React, Vite, FastAPI, PostgreSQL, AWS RDS, AWS EC2, NGINX).
+    *   **AWS Infrastructure Automation**: Production Multi-AZ VPC, EKS & RDS Terraform automation.
+*   **Vibrant Cyber-Midnight Aesthetic**: A custom, ultra-premium dark theme with cosmic backgrounds (`#0b0f19`), pulsing neon accents, and ambient mesh gradients.
+*   **DevOps Engineering Proof of Work**: Features an Engineering Capability Snapshot, interactive terminal visualizers, and a signature "This Portfolio is a DevOps Project" infrastructure guide.
 *   **Enterprise Containerization**: Fully Dockerized production environment utilizing multi-stage builds and an optimized NGINX alpine server.
 *   **SEO & Performance Optimized**: Built on Vite for lightning-fast HMR and minimal bundle sizes, served via Gzip-compressed NGINX.
+
 
 ## 🛠️ Tech Stack & DevOps Tools
 
