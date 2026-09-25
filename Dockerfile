@@ -18,6 +18,11 @@ RUN npm run build
 # Stage 2: Serve the static application using non-root unprivileged NGINX
 FROM nginxinc/nginx-unprivileged:alpine AS production
 
+# Security Patch: Update Alpine libexpat package to fix CVE-2026-93990
+USER root
+RUN apk upgrade --no-cache libexpat
+USER 101
+
 # Copy custom NGINX SPA configuration
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
