@@ -1268,3 +1268,13 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 5px rgba(124, 58, 237, 0.5);
   transition: width 0.1s ease-out;
 }
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

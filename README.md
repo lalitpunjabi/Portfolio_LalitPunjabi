@@ -119,35 +119,61 @@ kubectl get pods -l app=portfolio-ui
 
 ---
 
-## 💻 Local Development & Docker Setup
+## 💻 Local Development & Engineering Tooling
 
-### Option A: Using Docker Compose (Recommended)
+### System Requirements
+* **Node.js**: `v20.x` or higher
+* **npm**: `v10.x` or higher
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/lalitpunjabi/portfolio.git
-    cd portfolio
-    ```
+### 1. Installation & Environment Configuration
+```bash
+# Clone the repository
+git clone https://github.com/lalitpunjabi/Portfolio_LalitPunjabi.git
+cd Portfolio_LalitPunjabi
 
-2.  **Spin up the containerized environment:**
-    ```bash
-    docker-compose up --build -d
-    ```
-    *The application will now be running at `http://localhost:8080`.*
+# Install dependencies
+npm install
 
-3.  **To stop the container:**
-    ```bash
-    docker-compose down
-    ```
+# Configure environment variables (optional for contact form)
+cp .env.example .env
+```
 
-### Option B: Standard Node.js Development
+### 2. Available Development Commands
 
-1.  **Install dependencies and start dev server:**
-    ```bash
-    npm install
-    npm run dev
-    ```
-    *Available at `http://localhost:5173`.*
+| Command | Action |
+| :--- | :--- |
+| `npm run dev` | Start local Vite development server at `http://localhost:5173` |
+| `npm run typecheck` | Run strict TypeScript type check (`tsc --noEmit`) |
+| `npm run lint` | Run ESLint across `.ts`, `.tsx`, `.js`, `.jsx` files |
+| `npm run test` | Run unit & component test suite via Vitest |
+| `npm run test:coverage` | Run Vitest test coverage report |
+| `npm run build` | Compile TypeScript & generate production build bundle in `dist/` |
+| `npm run preview` | Preview production build locally |
+
+### 3. Project Structure
+```text
+Portfolio_LalitPunjabi/
+├── src/
+│   ├── components/        # UI section components & ErrorBoundary
+│   │   └── __tests__/     # Component unit & integration tests
+│   ├── config/            # External service configurations (EmailJS)
+│   ├── data/              # Portfolio content data (projects, skills, certs)
+│   ├── hooks/             # Custom React hooks & animation utilities
+│   │   └── __tests__/     # Hook test suites
+│   ├── test/              # Test environment setup
+│   ├── App.tsx            # Main application layout
+│   └── main.tsx           # Application entry point with ErrorBoundary
+├── public/                # Static assets, robots.txt, sitemap.xml
+├── eslint.config.js       # ESLint flat configuration for TypeScript
+├── vite.config.ts         # Vite build & Vitest test configuration
+└── tsconfig.json          # Strict TypeScript compiler options
+```
+
+### 4. Option B: Using Docker Compose
+```bash
+docker-compose up --build -d
+```
+*Application available at `http://localhost:8080`.*
 
 ---
 

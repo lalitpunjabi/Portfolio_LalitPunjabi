@@ -3,24 +3,29 @@ name: Release Automation
 on:
   push:
     tags:
-      - "v*.*.*" # Trigger on semantic version tags
+      - "v*.*.*"
   workflow_dispatch:
     inputs:
       version:
         description: "Version tag (e.g. v1.2.0)"
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release:
     name: Generate Automated GitHub Release
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required to create releases
+      contents: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for accurate changelogs
+          fetch-depth: 0
 
       - name: Generate Changelog & Release Notes
         uses: mikepenz/release-changelog-builder-action@v4

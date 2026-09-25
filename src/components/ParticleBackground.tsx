@@ -2,39 +2,27 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [particles, setParticles] = useState<Array<{ id: number; left: string; delay: string; duration: string; size: string }>>([]);
-  const [hexagons, setHexagons] = useState<Array<{ id: number; top: string; left: string; delay: string; scale: string }>>([]);
-  const [dataFlows, setDataFlows] = useState<Array<{ id: number; left: string; delay: string }>>([]);
+  const [particles] = useState(() => Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 5}s`,
+    duration: `${10 + Math.random() * 20}s`,
+    size: `${2 + Math.random() * 4}px`,
+  })));
+  
+  const [hexagons] = useState(() => Array.from({ length: 8 }, (_, i) => ({
+    id: i,
+    top: `${Math.random() * 100}%`,
+    left: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 10}s`,
+    scale: `${0.5 + Math.random() * 0.5}`,
+  })));
 
-  useEffect(() => {
-    // Generate 50 particles with random properties
-    const particleArray = Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      delay: `${Math.random() * 5}s`,
-      duration: `${10 + Math.random() * 20}s`,
-      size: `${2 + Math.random() * 4}px`,
-    }));
-    setParticles(particleArray);
-
-    // Generate 8 hexagons for tech aesthetic
-    const hexagonArray = Array.from({ length: 8 }, (_, i) => ({
-      id: i,
-      top: `${Math.random() * 100}%`,
-      left: `${Math.random() * 100}%`,
-      delay: `${Math.random() * 10}s`,
-      scale: `${0.5 + Math.random() * 0.5}`,
-    }));
-    setHexagons(hexagonArray);
-
-    // Generate 5 data flow streams
-    const dataArray = Array.from({ length: 5 }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      delay: `${Math.random() * 4}s`,
-    }));
-    setDataFlows(dataArray);
-  }, []);
+  const [dataFlows] = useState(() => Array.from({ length: 5 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 4}s`,
+  })));
 
   useEffect(() => {
     const canvas = canvasRef.current;

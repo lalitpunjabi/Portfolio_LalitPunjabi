@@ -5,13 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: lalitpunjabi/devops-portfolio:latest
+    image: ghcr.io/lalitpunjabi/portfolio_lalitpunjabi:latest
     container_name: devops-portfolio-ui
     restart: unless-stopped
     ports:
-      - "8080:80" # Maps host port 8080 to container port 80
+      - "8080:8080" # Maps host port 8080 to container unprivileged port 8080
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
       interval: 30s
       timeout: 5s
       retries: 3

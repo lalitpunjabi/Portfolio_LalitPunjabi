@@ -1,78 +1,210 @@
 name: Continuous Deployment (AWS EC2 Docker)
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Docker Image Automation (GHCR)"]
+    types:
+      - completed
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker image tag or SHA to deploy (e.g. sha-a8f91c7 or latest)'
+        required: false
+        default: ''
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
-  build-and-push:
-    name: Build & Push Docker Image to GHCR
+  deploy:
+    name: Deploy to AWS EC2 Server via SSH (Zero-Downtime Blue/Green)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    environment: Production
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Container Registry (GHCR)
-        uses: docker/login-action@v3
+      - name: Configure AWS Credentials via OIDC
+        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
 
-      - name: Convert repository name to lowercase
+      - name: Determine Target Docker Image Tag
+        id: image_meta
         run: |
-          echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            TAG="${{ github.event.inputs.image_tag }}"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            TAG="sha-${SHA:0:7}"
+          else
+            TAG="latest"
+          fi
+          echo "TARGET_TAG=${TAG}" >> $GITHUB_ENV
+          echo "Selected Target Image Tag: ${TAG}"
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ env.REPO_LC }}:latest
-            ghcr.io/${{ env.REPO_LC }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy:
-    name: Deploy to VPS Server via SSH
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    environment: Production
-
-    steps:
-      - name: Deploy Container via SSH
+      - name: Zero-Downtime Blue/Green Deploy & Automatic Rollback via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          TARGET_TAG: ${{ env.TARGET_TAG }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
+          envs: TARGET_TAG
           script: |
+            set -Eeuo pipefail
             REPO_LC=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-            echo "Pulling latest Docker image: ghcr.io/$REPO_LC:latest"
-            sudo docker pull ghcr.io/$REPO_LC:latest
+            IMAGE_REF="ghcr.io/${REPO_LC}:${TARGET_TAG}"
             
-            echo "Stopping old container..."
-            sudo docker stop devops-portfolio-ui || true
-            sudo docker rm devops-portfolio-ui || true
+            echo "======================================================================"
+            echo " EC2 Zero-Downtime Blue/Green Production Deployment"
+            echo " Target Image: ${IMAGE_REF}"
+            echo "======================================================================"
             
-            echo "Starting new container..."
-            sudo docker run -d \
-              --name devops-portfolio-ui \
+            echo "[1/6] System Pre-flight Checks..."
+            docker version > /dev/null
+            docker info > /dev/null
+            
+            echo "[2/6] Pulling Targeted Image & Resolving Digest..."
+            docker pull "${IMAGE_REF}"
+            DIGEST=$(docker image inspect --format='{{index .RepoDigests 0}}' "${IMAGE_REF}" 2>/dev/null || echo "")
+            if [ -z "${DIGEST}" ]; then
+              echo "ERROR: Unable to resolve image digest"
+              exit 1
+            fi
+            echo "Immutable Digest: ${DIGEST}"
+            
+            # Determine Active & Candidate Slots
+            ACTIVE_COLOR="none"
+            ACTIVE_PORT="8080"
+            CANDIDATE_COLOR="blue"
+            CANDIDATE_PORT="8080"
+            
+            if docker ps --format '{{.Names}}' | grep -q "^portfolio-ui-blue$"; then
+              ACTIVE_COLOR="blue"
+              ACTIVE_PORT="8080"
+              CANDIDATE_COLOR="green"
+              CANDIDATE_PORT="8081"
+            elif docker ps --format '{{.Names}}' | grep -q "^portfolio-ui-green$"; then
+              ACTIVE_COLOR="green"
+              ACTIVE_PORT="8081"
+              CANDIDATE_COLOR="blue"
+              CANDIDATE_PORT="8080"
+            elif docker ps --format '{{.Names}}' | grep -q "^devops-portfolio-ui$"; then
+              ACTIVE_COLOR="legacy"
+              ACTIVE_PORT="8080"
+              CANDIDATE_COLOR="blue"
+              CANDIDATE_PORT="8081"
+            fi
+            
+            echo "Active Slot: ${ACTIVE_COLOR} (Port ${ACTIVE_PORT})"
+            echo "Candidate Slot: ${CANDIDATE_COLOR} (Port ${CANDIDATE_PORT})"
+            
+            rollback() {
+              echo "❌ DEPLOYMENT FAILED - EXECUTING AUTOMATIC ROLLBACK..."
+              docker stop "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
+              docker rm "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
+              
+              if [ -f /etc/nginx/conf.d/portfolio_upstream.conf ]; then
+                echo "Restoring Host NGINX to active port ${ACTIVE_PORT}..."
+                echo "upstream portfolio_backend { server 127.0.0.1:${ACTIVE_PORT}; }" | sudo tee /etc/nginx/conf.d/portfolio_upstream.conf > /dev/null
+                sudo nginx -t && (sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null) || true
+              fi
+              
+              if [ "${ACTIVE_COLOR}" != "none" ]; then
+                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${ACTIVE_PORT}/" || echo "000")
+                if [ "$HTTP_CODE" -eq 200 ]; then
+                  echo "✅ ROLLBACK SUCCESSFUL: Active container serving HTTP 200."
+                else
+                  echo "⚠️ ROLLBACK WARNING: Active container returned HTTP ${HTTP_CODE}"
+                fi
+              fi
+              exit 1
+            }
+            
+            echo "[3/6] Launching Candidate Slot (portfolio-ui-${CANDIDATE_COLOR} on :${CANDIDATE_PORT})..."
+            docker stop "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
+            docker rm "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
+            
+            docker run -d \
+              --name "portfolio-ui-${CANDIDATE_COLOR}" \
               --restart unless-stopped \
-              -p 8080:80 \
-              ghcr.io/$REPO_LC:latest
+              -p "${CANDIDATE_PORT}:8080" \
+              "${DIGEST}" || rollback
+            
+            echo "[4/6] Polling Candidate Health Status & Running HTTP Check..."
+            HEALTH_OK=false
+            for i in $(seq 1 12); do
+              ST=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}starting{{end}}' "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || echo "starting")
+              if [ "$ST" = "healthy" ]; then
+                HEALTH_OK=true
+                echo "Candidate Health: HEALTHY"
+                break
+              fi
+              echo "Waiting for health... (${i}/12)"
+              sleep 5
+            done
+            
+            if [ "$HEALTH_OK" != "true" ]; then
+              echo "Candidate container failed healthcheck"
+              rollback
+            fi
+            
+            C_HTTP=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${CANDIDATE_PORT}/" || echo "000")
+            if [ "$C_HTTP" -ne 200 ]; then
+              echo "Candidate HTTP check failed: ${C_HTTP}"
+              rollback
+            fi
+            
+            echo "[5/6] Promoting Candidate Slot in Host NGINX..."
+            if [ -d /etc/nginx/conf.d ]; then
+              echo "upstream portfolio_backend { server 127.0.0.1:${CANDIDATE_PORT}; }" | sudo tee /etc/nginx/conf.d/portfolio_upstream.conf > /dev/null
+              sudo nginx -t && (sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null) || rollback
+            fi
+            
+            echo "[6/6] Verifying Production Endpoint & Decommissioning Old Container..."
+            P_HTTP=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${CANDIDATE_PORT}/" || echo "000")
+            if [ "$P_HTTP" -ne 200 ]; then
+              rollback
+            fi
+            
+            if [ "${ACTIVE_COLOR}" = "blue" ] || [ "${ACTIVE_COLOR}" = "green" ]; then
+              docker stop "portfolio-ui-${ACTIVE_COLOR}" 2>/dev/null || true
+              docker rm "portfolio-ui-${ACTIVE_COLOR}" 2>/dev/null || true
+            elif [ "${ACTIVE_COLOR}" = "legacy" ]; then
+              docker stop devops-portfolio-ui 2>/dev/null || true
+              docker rm devops-portfolio-ui 2>/dev/null || true
+            fi
+            
+            docker image prune -f || true
+            echo "🎉 ZERO-DOWNTIME DEPLOYMENT PROMOTED SUCCESSFULLY!"
 
-            echo "Cleaning up dangling images..."
-            sudo docker image prune -f
-            echo "Deployment successfully completed!"
+      - name: Generate Deployment Job Summary
+        if: always()
+        run: |
+          echo "## 🚀 Production Deployment Observability Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit SHA** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Image Tag** | \`${{ env.TARGET_TAG }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Registry** | \`ghcr.io/lalitpunjabi/portfolio_lalitpunjabi\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployment Status** | \`${{ job.status }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | Production (\`https://app.devlalit.space\`) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Strategy** | Zero-Downtime Blue/Green Promotion |" >> $GITHUB_STEP_SUMMARY
+
+
+
+

@@ -10,11 +10,11 @@ export function useTerminalTypewriter(lines: TerminalLine[], typingSpeed = 30) {
   const [displayedLines, setDisplayedLines] = useState<TerminalLine[]>([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
+
+  const isComplete = currentLineIndex >= lines.length;
 
   useEffect(() => {
-    if (currentLineIndex >= lines.length) {
-      setIsComplete(true);
+    if (isComplete) {
       return;
     }
 
@@ -34,16 +34,15 @@ export function useTerminalTypewriter(lines: TerminalLine[], typingSpeed = 30) {
 
       return () => clearTimeout(timer);
     } else {
-      // Line complete, add to displayed lines
-      setDisplayedLines(prev => [...prev, { ...currentLine, value: valueString }]);
-      setCurrentLineIndex(prev => prev + 1);
-      setCurrentCharIndex(0);
+      const timer = setTimeout(() => {
+        setDisplayedLines(prev => [...prev, { ...currentLine, value: valueString }]);
+        setCurrentLineIndex(prev => prev + 1);
+        setCurrentCharIndex(0);
+      }, 50);
 
-      // Delay before next line
-      const timer = setTimeout(() => {}, 200);
       return () => clearTimeout(timer);
     }
-  }, [currentCharIndex, currentLineIndex, lines, typingSpeed]);
+  }, [currentCharIndex, currentLineIndex, lines, typingSpeed, isComplete]);
 
   return { displayedLines, isComplete };
 }

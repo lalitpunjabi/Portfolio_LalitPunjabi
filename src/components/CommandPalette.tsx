@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, Terminal, FileText, Mail, Compass, Sparkles, Check, Palette, Briefcase } from 'lucide-react';
 
 interface CommandPaletteProps {
@@ -45,13 +45,13 @@ export default function CommandPalette({
 
   const filteredSections = sections.filter(s => s.name.toLowerCase().includes(query.toLowerCase()));
 
-  const navigateTo = (id: string) => {
+  const navigateTo = useCallback((id: string) => {
     onClose();
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, [onClose]);
 
   const copyEmail = () => {
     navigator.clipboard.writeText('lalitpunjabi.pro@gmail.com');
@@ -59,9 +59,10 @@ export default function CommandPalette({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  useEffect(() => {
+  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
     setSelectedIndex(0);
-  }, [query]);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -91,7 +92,7 @@ export default function CommandPalette({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, filteredSections, selectedIndex]);
+  }, [isOpen, onClose, filteredSections, selectedIndex, navigateTo]);
 
   if (!isOpen) return null;
 
@@ -108,7 +109,7 @@ export default function CommandPalette({
             type="text"
             placeholder="Search sections or commands... (e.g. projects, lab, recruiter, resume)"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleQueryChange}
             autoFocus
             className="w-full bg-transparent border-none outline-none text-text-primary placeholder:text-text-tertiary text-sm"
           />

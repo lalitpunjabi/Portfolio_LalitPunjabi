@@ -8,9 +8,42 @@ on:
       - "v*.*.*"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
+  ci-validation:
+    name: CI Quality Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Code Quality & Type Check
+        run: |
+          npm run lint
+          npm run typecheck
+
+      - name: Unit & Component Tests
+        run: npm run test
+
   docker-publish:
-    name: Build & Publish Multi-tag Docker Image
+    name: Build & Publish Immutable Docker Image to GHCR
+    needs: ci-validation
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,24 +67,31 @@ jobs:
         run: |
           echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
-      # Automatically generate tags based on Git state (latest, SHA, Semantic Version)
-      - name: Extract Docker metadata
+      - name: Extract Docker OCI Metadata & Immutable Tags
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ env.REPO_LC }}
+          labels: |
+            org.opencontainers.image.title=Portfolio Lalit Punjabi
+            org.opencontainers.image.description=Production unprivileged NGINX static web application for Lalit Punjabi
+            org.opencontainers.image.vendor=Lalit Punjabi
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,format=short
+            type=ref,event=branch
+            type=sha,prefix=sha-,format=short
+            type=sha,prefix=sha-full-,format=long
             type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
-      # Build and push the image to GHCR with optimal caching strategies
-      - name: Build and Push Docker Image
+      - name: Build and Push OCI Compliant Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+

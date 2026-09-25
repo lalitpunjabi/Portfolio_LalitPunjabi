@@ -198,17 +198,19 @@ export default function ContactSection() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Name Field */}
                   <div className="group/field">
-                    <div className="flex items-center mb-2">
+                    <label htmlFor="contact-name" className="flex items-center mb-2 cursor-pointer">
                       <span className="text-emerald-400 font-mono text-sm mr-2">➜</span>
                       <span className="text-cyan-400 font-mono text-sm mr-2">~</span>
                       <span className="text-purple-400 font-mono text-xs">./input_name.sh</span>
-                    </div>
+                    </label>
                     <input 
+                      id="contact-name"
                       type="text" 
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Enter your name..." 
+                      aria-label="Your Name"
                       required
                       className="w-full bg-[#161b22] border border-[#30363d] rounded-lg px-4 py-3 text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-accent-primary/60 focus:bg-[#1c2533] focus:shadow-[0_0_20px_rgba(0,229,255,0.15)] transition-all font-mono text-sm hover:border-accent-primary/30"
                     />
@@ -216,17 +218,19 @@ export default function ContactSection() {
                   
                   {/* Email Field */}
                   <div className="group/field">
-                    <div className="flex items-center mb-2">
+                    <label htmlFor="contact-email" className="flex items-center mb-2 cursor-pointer">
                       <span className="text-emerald-400 font-mono text-sm mr-2">➜</span>
                       <span className="text-cyan-400 font-mono text-sm mr-2">~</span>
                       <span className="text-purple-400 font-mono text-xs">./input_email.sh</span>
-                    </div>
+                    </label>
                     <input 
+                      id="contact-email"
                       type="email" 
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="Enter your email..." 
+                      aria-label="Your Email"
                       required
                       className="w-full bg-[#161b22] border border-[#30363d] rounded-lg px-4 py-3 text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-accent-primary/60 focus:bg-[#1c2533] focus:shadow-[0_0_20px_rgba(0,229,255,0.15)] transition-all font-mono text-sm hover:border-accent-primary/30"
                     />
@@ -234,16 +238,18 @@ export default function ContactSection() {
                   
                   {/* Message Field */}
                   <div className="group/field">
-                    <div className="flex items-center mb-2">
+                    <label htmlFor="contact-message" className="flex items-center mb-2 cursor-pointer">
                       <span className="text-emerald-400 font-mono text-sm mr-2">➜</span>
                       <span className="text-cyan-400 font-mono text-sm mr-2">~</span>
                       <span className="text-purple-400 font-mono text-xs">./compose_message.sh</span>
-                    </div>
+                    </label>
                     <textarea 
+                      id="contact-message"
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
                       placeholder="Type your message here..." 
+                      aria-label="Your Message"
                       required
                       rows={5}
                       className="w-full bg-[#161b22] border border-[#30363d] rounded-lg px-4 py-3 text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-accent-primary/60 focus:bg-[#1c2533] focus:shadow-[0_0_20px_rgba(0,229,255,0.15)] transition-all resize-none font-mono text-sm hover:border-accent-primary/30"

@@ -301,7 +301,9 @@ export default function HeroSection({ onOpenResume, onOpenPalette, isRecruiterMo
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none" />
                 <img
                   src="/images/IMG-20260918-WA0000.jpg"
-                  alt="Lalit Punjabi"
+                  alt="Lalit Punjabi - DevOps Engineer"
+                  loading="eager"
+                  decoding="async"
                   className="group-hover:scale-105 transition-transform duration-500"
                   style={{ width: '180px', height: '230px', maxWidth: '180px', maxHeight: '230px', objectFit: 'cover', objectPosition: 'top' }}
                 />
