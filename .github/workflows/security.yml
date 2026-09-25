@@ -17,6 +17,7 @@ concurrency:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   trivy-scan:
@@ -27,28 +28,46 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build Docker Image for Vulnerability Scanning
-        run: docker build -t app-to-scan:latest .
+      - name: Build Production Docker Image
+        run: |
+          docker build \
+            --tag app-to-scan:${{ github.sha }} \
+            .
 
-      - name: Run Trivy Container Image Scan
-        uses: aquasecurity/trivy-action@master
+      - name: Run Trivy Container Vulnerability Scan
+        uses: aquasecurity/trivy-action@0.29.0
         with:
-          scan-type: 'image'
-          image-ref: 'app-to-scan:latest'
-          format: 'table'
+          scan-type: image
+          image-ref: app-to-scan:${{ github.sha }}
+          format: sarif
+          output: trivy-image-results.sarif
           exit-code: '1'
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
 
-      - name: Run Trivy Filesystem & Secret Scan
-        uses: aquasecurity/trivy-action@master
+      - name: Upload Container Scan Results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
+          sarif_file: trivy-image-results.sarif
+
+      - name: Run Trivy Filesystem Vulnerability & Secret Scan
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
           exit-code: '1'
           ignore-unfixed: true
-          scanners: 'vuln,secret'
-          severity: 'CRITICAL,HIGH'
+          scanners: vuln,secret
+          severity: CRITICAL,HIGH
 
+      - name: Run Trivy Dockerfile Misconfiguration Scan
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: table
+          exit-code: '1'
+          severity: HIGH,CRITICAL
