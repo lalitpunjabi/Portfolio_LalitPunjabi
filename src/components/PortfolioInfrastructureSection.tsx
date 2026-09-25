@@ -36,7 +36,7 @@ export default function PortfolioInfrastructureSection() {
             Continuous Integration & Deployment Architecture
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center">
-            {['Git Push', 'Type Check', 'Lint Audit', 'Docker Build', 'Trivy Scan', 'GHCR Push', 'EKS Deploy'].map((step, idx) => (
+            {['Git Push', 'Type Check', 'Lint Audit', 'Docker Build', 'Trivy Scan', 'GHCR Push', 'EC2 Deploy'].map((step, idx) => (
               <div key={idx} className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col items-center justify-center space-y-1 hover:border-accent-primary/40 transition-colors">
                 <span className="text-[10px] text-accent-primary font-bold">0{idx + 1}</span>
                 <span className="text-white font-semibold">{step}</span>

@@ -3,7 +3,7 @@
 [![CI Pipeline](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/ci.yml?branch=main&label=CI%20Pipeline&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/ci.yml)
 [![DevSecOps Scan](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/security.yml?branch=main&label=Security%20Scan&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/security.yml)
 [![Docker Publish](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/docker-publish.yml?branch=main&label=Docker%20Publish&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/docker-publish.yml)
-[![AWS CD](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/cd-aws.yml?branch=main&label=AWS%20Deployment&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/cd-aws.yml)
+[![AWS EC2 Deployment](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/cd-vps.yml?branch=main&label=AWS%20EC2%20Deployment&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/cd-vps.yml)
 [![Kubernetes CD](https://img.shields.io/github/actions/workflow/status/lalitpunjabi/Portfolio_LalitPunjabi/cd-k8s.yml?branch=main&label=K8s%20Deployment&style=flat-square)](https://github.com/lalitpunjabi/Portfolio_LalitPunjabi/actions/workflows/cd-k8s.yml)
 
 A premium, high-performance developer portfolio built with React, Vite, and completely custom Cyber-Midnight CSS. Designed specifically to showcase enterprise-grade DevSecOps expertise, robust CI/CD automation, containerization workflows, and cloud infrastructure deployments.
@@ -30,7 +30,7 @@ A premium, high-performance developer portfolio built with React, Vite, and comp
 *   **Containerization**: Docker & Docker Compose (Multi-stage builds, Alpine base images)
 *   **Web Server**: NGINX (Configured for SPA routing, Gzip, Security Headers, and aggressive caching)
 *   **CI/CD Automation**: GitHub Actions (For automated build, validation, and deployment pipelines)
-*   **Cloud Infrastructure**: AWS S3 & CloudFront / AWS EC2
+*   **Cloud Infrastructure & Hosting**: AWS EC2 (Docker + NGINX Reverse Proxy + Certbot SSL on `app.devlalit.space`) / AWS S3 & CloudFront
 
 ---
 
@@ -70,9 +70,12 @@ This project features a fully automated, production-grade GitHub Actions CI/CD a
 *   **Docker Image Automation (`docker-publish.yml`)**: 
     *   Automatically builds and publishes the optimized Docker image to the GitHub Container Registry (GHCR).
     *   Implements multi-tagging (`latest`, short SHA, and semantic versions).
+*   **AWS EC2 Continuous Deployment (`cd-vps.yml`)**: 
+    *   Triggered automatically on `push` to the `main` branch.
+    *   Builds the production Docker image, pushes to GHCR, and authenticates via SSH key to the AWS EC2 instance using GitHub Environment Secrets (`Production` environment: `VPS_HOST`, `VPS_USERNAME`, `VPS_SSH_KEY`).
+    *   Restarts the container on port `8080`, proxied by Host NGINX with Let's Encrypt SSL on `app.devlalit.space`.
 *   **Environment-Based Deployments (`cd-aws.yml`)**: 
-    *   Deploys artifacts to AWS S3 using strict GitHub Environments (`production`) for manual approval gating.
-    *   Automatically invalidates the AWS CloudFront cache.
+    *   Deploys static artifacts to AWS S3 + CloudFront using strict GitHub Environments (`production`) for manual approval gating.
 *   **Release Automation (`release.yml`)**: 
     *   Automatically generates GitHub Releases and rich changelogs based on semantic tags.
 *   **Kubernetes Automation (`cd-k8s.yml`)**:
@@ -150,23 +153,69 @@ kubectl get pods -l app=portfolio-ui
 
 ## 🚀 Production Deployment Steps
 
-### Deploying to AWS EC2 via Docker
+### Deploying to AWS EC2 via Docker & GitHub Actions (Active Production Deployment)
 
-This guide explains how to deploy the containerized application to an AWS EC2 Linux instance.
+This portfolio is configured for automated continuous deployment to an **AWS EC2 Ubuntu Instance** with Hostinger DNS (`app.devlalit.space`) and automated Let's Encrypt SSL/TLS.
 
-1.  **Provision an EC2 Instance:** Launch an Ubuntu or Amazon Linux 2 instance and open port `80` and `8080` in the Security Group.
-2.  **Install Docker & Git on EC2:**
-    ```bash
-    sudo apt update
-    sudo apt install docker.io docker-compose git -y
-    sudo systemctl enable --now docker
-    ```
-3.  **Clone and Run:**
-    ```bash
-    git clone https://github.com/lalitpunjabi/portfolio.git
-    cd portfolio
-    sudo docker-compose up --build -d
-    ```
+#### 1. Hostinger DNS Configuration
+*   Create an **A Record** on Hostinger hPanel for domain `devlalit.space`:
+    *   **Host:** `app`
+    *   **Points to:** `YOUR_AWS_EC2_ELASTIC_IP`
+    *   **TTL:** `300`
+
+#### 2. AWS EC2 Instance & Security Group
+*   Launch an Ubuntu 24.04 LTS `t2.micro` / `t3.micro` EC2 instance.
+*   Attach an **Elastic IP** to ensure a persistent public IP.
+*   In the **Security Group**, allow inbound rules:
+    *   **Port 22 (SSH)** from your IP / Anywhere
+    *   **Port 80 (HTTP)** from Anywhere (`0.0.0.0/0`)
+    *   **Port 443 (HTTPS)** from Anywhere (`0.0.0.0/0`)
+
+#### 3. One-Time EC2 Server Setup
+Connect via SSH (`ssh -i key.pem ubuntu@YOUR_EC2_IP`) and execute:
+```bash
+# Install Docker, Host Nginx, and Certbot
+sudo apt update && sudo apt install -y docker.io nginx certbot python3-certbot-nginx
+sudo systemctl enable --now docker nginx
+sudo usermod -aG docker ubuntu
+
+# Configure Host Nginx Reverse Proxy
+sudo nano /etc/nginx/sites-available/app.devlalit.space
+```
+
+Add the following Nginx proxy block:
+```nginx
+server {
+    listen 80;
+    server_name app.devlalit.space;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Enable site & generate automated SSL:
+```bash
+sudo ln -s /etc/nginx/sites-available/app.devlalit.space /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d app.devlalit.space
+```
+
+#### 4. GitHub Environment Secrets Setup
+In GitHub Repository $\rightarrow$ **Settings** $\rightarrow$ **Secrets and variables** $\rightarrow$ **Actions** $\rightarrow$ **Environment Secrets** under the **`Production`** environment:
+*   `VPS_HOST`: Your AWS EC2 Elastic IP address
+*   `VPS_USERNAME`: `ubuntu`
+*   `VPS_SSH_KEY`: Full contents of your `.pem` SSH private key
+
+#### 5. Automated CI/CD Execution
+Pushing code to the `main` branch automatically triggers `.github/workflows/cd-vps.yml`, which builds the image, pushes to `ghcr.io`, SSHs into your EC2 server, and restarts the container on port `8080`.
+
+---
 
 ### Alternative: AWS S3 + CloudFront (Serverless)
 
