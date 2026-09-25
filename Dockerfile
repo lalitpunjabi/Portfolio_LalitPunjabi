@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy dependency definitions first to maximize Docker layer caching
 COPY package*.json ./
 
-# Deterministic dependency installation with Alpine musl native binary support
-RUN npm ci && npm install --no-save @rollup/rollup-linux-x64-musl
+# Deterministic dependency installation
+RUN npm ci
 
 # Copy application source code
 COPY . .
@@ -17,11 +17,6 @@ RUN npm run build
 
 # Stage 2: Serve the static application using non-root unprivileged NGINX
 FROM nginxinc/nginx-unprivileged:alpine AS production
-
-# Security Patch: Update Alpine packages (fixes CVE-2026-93990 libexpat)
-USER root
-RUN apk upgrade --no-cache
-USER 101
 
 # Copy custom NGINX SPA configuration
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf

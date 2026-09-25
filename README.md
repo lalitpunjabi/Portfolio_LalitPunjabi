@@ -179,77 +179,101 @@ docker-compose up --build -d
 
 ## 🚀 Production Deployment Steps
 
-### Deploying to AWS EC2 via Docker & GitHub Actions (Active Production Deployment)
+### 🔄 Active Production Deployment Architecture
 
-This portfolio is configured for automated continuous deployment to an **AWS EC2 Ubuntu Instance** with Hostinger DNS (`app.devlalit.space`) and automated Let's Encrypt SSL/TLS.
+The production application is deployed on **AWS EC2** using containerized unprivileged NGINX proxied by Host NGINX with Certbot TLS (`https://app.devlalit.space`).
 
-#### 1. Hostinger DNS Configuration
-*   Create an **A Record** on Hostinger hPanel for domain `devlalit.space`:
-    *   **Host:** `app`
-    *   **Points to:** `YOUR_AWS_EC2_ELASTIC_IP`
-    *   **TTL:** `300`
+> [!IMPORTANT]
+> **Production Architecture Disclaimer**: S3 and CloudFront are **NOT** used for active production hosting. The live application relies on GitHub Actions → GHCR → SSH → AWS EC2 → Host NGINX → Docker Container.
 
-#### 2. AWS EC2 Instance & Security Group
-*   Launch an Ubuntu 24.04 LTS `t2.micro` / `t3.micro` EC2 instance.
-*   Attach an **Elastic IP** to ensure a persistent public IP.
-*   In the **Security Group**, allow inbound rules:
-    *   **Port 22 (SSH)** from your IP / Anywhere
-    *   **Port 80 (HTTP)** from Anywhere (`0.0.0.0/0`)
-    *   **Port 443 (HTTPS)** from Anywhere (`0.0.0.0/0`)
-
-#### 3. One-Time EC2 Server Setup
-Connect via SSH (`ssh -i key.pem ubuntu@YOUR_EC2_IP`) and execute:
-```bash
-# Install Docker, Host Nginx, and Certbot
-sudo apt update && sudo apt install -y docker.io nginx certbot python3-certbot-nginx
-sudo systemctl enable --now docker nginx
-sudo usermod -aG docker ubuntu
-
-# Configure Host Nginx Reverse Proxy
-sudo nano /etc/nginx/sites-available/app.devlalit.space
+```text
+GitHub (main branch)
+   ↓
+GitHub Actions (OIDC Auth + SSH Deployment)
+   ↓
+GHCR (ghcr.io/lalitpunjabi/portfolio_lalitpunjabi:sha-<short-sha>)
+   ↓
+SSH (appleboy/ssh-action via VPS_HOST / VPS_SSH_KEY)
+   ↓
+AWS EC2 Host
+   ↓
+Host NGINX (Reverse Proxy & Certbot TLS on https://app.devlalit.space)
+   ↓
+Docker Container (Unprivileged NGINX :8080 [Blue] or :8081 [Green])
 ```
-
-Add the following Nginx proxy block:
-```nginx
-server {
-    listen 80;
-    server_name app.devlalit.space;
-
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-Enable site & generate automated SSL:
-```bash
-sudo ln -s /etc/nginx/sites-available/app.devlalit.space /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d app.devlalit.space
-```
-
-#### 4. GitHub Environment Secrets Setup
-In GitHub Repository $\rightarrow$ **Settings** $\rightarrow$ **Secrets and variables** $\rightarrow$ **Actions** $\rightarrow$ **Environment Secrets** under the **`Production`** environment:
-*   `VPS_HOST`: Your AWS EC2 Elastic IP address
-*   `VPS_USERNAME`: `ubuntu`
-*   `VPS_SSH_KEY`: Full contents of your `.pem` SSH private key
-
-#### 5. Automated CI/CD Execution
-Pushing code to the `main` branch automatically triggers `.github/workflows/cd-vps.yml`, which builds the image, pushes to `ghcr.io`, SSHs into your EC2 server, and restarts the container on port `8080`.
 
 ---
 
-### Alternative: AWS S3 + CloudFront (Serverless)
+## 🔐 GitHub Actions & AWS Security Configuration
 
-This portfolio is also built to be deployed using a highly scalable, serverless AWS architecture.
+### 1. AWS IAM Role Trust Policy (OIDC)
+Create an IAM Role with OIDC Federated Authentication. The Trust Policy must be strictly restricted to the repository and `Production` GitHub Environment:
 
-1.  **Build:** `npm run build`
-2.  **Upload to S3:** Upload the `dist/` folder to a private S3 bucket.
-3.  **Configure CloudFront:** Create a CDN pointing to the S3 bucket, enable **Origin Access Control (OAC)**, and set error pages (403/404) to redirect to `/index.html`.
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::YOUR_AWS_ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+          "token.actions.githubusercontent.com:sub": "repo:lalitpunjabi/Portfolio_LalitPunjabi:environment:Production"
+        }
+      }
+    }
+  ]
+}
+```
+
+### 2. GitHub Production Environment Configuration
+In GitHub Repository $\rightarrow$ **Settings** $\rightarrow$ **Environments** $\rightarrow$ **`Production`**:
+
+#### Secrets (`Production` Environment Secrets)
+* `AWS_ROLE_ARN`: AWS IAM Role ARN for OIDC (`arn:aws:iam::YOUR_AWS_ACCOUNT_ID:role/GitHubActions-Portfolio-Production`)
+* `VPS_HOST`: AWS EC2 Public / Elastic IP address
+* `VPS_USERNAME`: `ubuntu` (or dedicated SSH deployment user)
+* `VPS_SSH_KEY`: OpenSSH private key with access to EC2 instance
+
+#### Variables (`Production` Environment Variables)
+* `AWS_REGION`: `ap-south-1`
+* `VPS_PORT`: `22`
+
+---
+
+## 🚀 Production Blue/Green Deployment & Automatic Rollback
+
+The production deployment script (`.github/workflows/cd-vps.yml` & `scripts/deploy-production.sh`) implements zero-downtime blue/green deployment:
+
+1. **Pre-flight Checks**: Validates Docker daemon, host NGINX status, and curl tools.
+2. **Pull & Digest Resolution**: Pulls `ghcr.io/lalitpunjabi/portfolio_lalitpunjabi:sha-<commit-sha>` and inspects the exact `sha256:` digest before altering running state.
+3. **Candidate Container Launch**: Starts candidate container on candidate port (`:8081` if active is `:8080`, or `:8080` if active is `:8081`).
+4. **Health Check & HTTP Smoke Test**: Polls `docker inspect` health status and checks local HTTP endpoint (`http://127.0.0.1:<candidate-port>/`).
+5. **Host NGINX Switch**: Backs up NGINX config, updates `proxy_pass` to candidate port, validates config via `sudo nginx -t`, and reloads NGINX (`sudo systemctl reload nginx`).
+6. **Public Endpoint Check**: Verifies `https://app.devlalit.space` HTTP 200 response.
+7. **Decommission Old Container**: Stops and removes old container only after candidate is 100% verified.
+
+### Automatic Rollback
+If any step fails (image pull, health check, HTTP smoke test, `nginx -t`, reload, public endpoint check):
+* Candidate container is automatically stopped and removed.
+* Host NGINX site configuration is restored from backup (`.bak`).
+* `sudo nginx -t && sudo systemctl reload nginx` is executed.
+* Active container health is verified.
+* Deployment exits with status 1 without breaking live site traffic.
+
+### Manual Rollback Command
+To manually initiate a rollback on EC2, run:
+```bash
+bash scripts/rollback-production.sh
+```
+
+---
+
+## 💻 Local Development & Engineering Tooling
 
 ---
 

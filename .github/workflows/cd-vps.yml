@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'Docker image tag or SHA to deploy (e.g. sha-a8f91c7 or latest)'
+        description: 'Docker image tag or SHA to deploy (e.g. sha-a8f91c7)'
         required: false
         default: ''
 
@@ -25,22 +25,22 @@ permissions:
 jobs:
   deploy:
     name: Deploy to AWS EC2 Server via SSH (Zero-Downtime Blue/Green)
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     environment: Production
+    env:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Configure AWS Credentials via OIDC
-        if: env.AWS_ROLE_ARN != ''
+        if: ${{ env.AWS_ROLE_ARN != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION || 'ap-south-1' }}
-        env:
-          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || secrets.AWS_REGION || 'ap-south-1' }}
 
       - name: Determine Target Docker Image Tag
         id: image_meta
@@ -51,7 +51,8 @@ jobs:
             SHA="${{ github.event.workflow_run.head_sha }}"
             TAG="sha-${SHA:0:7}"
           else
-            TAG="latest"
+            SHA="${{ github.sha }}"
+            TAG="sha-${SHA:0:7}"
           fi
           echo "TARGET_TAG=${TAG}" >> $GITHUB_ENV
           echo "Selected Target Image Tag: ${TAG}"
@@ -73,21 +74,28 @@ jobs:
             
             echo "======================================================================"
             echo " EC2 Zero-Downtime Blue/Green Production Deployment"
+            echo " Repository: ${{ github.repository }}"
+            echo " Commit SHA: ${{ github.sha }}"
             echo " Target Image: ${IMAGE_REF}"
             echo "======================================================================"
             
             echo "[1/6] System Pre-flight Checks..."
-            docker version > /dev/null
-            docker info > /dev/null
+            docker version > /dev/null || { echo "ERROR: Docker daemon unavailable"; exit 1; }
+            docker info > /dev/null || { echo "ERROR: Docker info failed"; exit 1; }
+            command -v curl >/dev/null || { echo "ERROR: curl binary unavailable"; exit 1; }
             
             echo "[2/6] Pulling Targeted Image & Resolving Digest..."
-            docker pull "${IMAGE_REF}"
-            DIGEST=$(docker image inspect --format='{{index .RepoDigests 0}}' "${IMAGE_REF}" 2>/dev/null || echo "")
-            if [ -z "${DIGEST}" ]; then
-              echo "ERROR: Unable to resolve image digest"
+            if ! docker pull "${IMAGE_REF}"; then
+              echo "ERROR: Docker pull failed for ${IMAGE_REF}"
               exit 1
             fi
-            echo "Immutable Digest: ${DIGEST}"
+            
+            DIGEST=$(docker image inspect --format='{{index .RepoDigests 0}}' "${IMAGE_REF}" 2>/dev/null || echo "")
+            if [ -z "${DIGEST}" ]; then
+              echo "ERROR: Unable to resolve immutable sha256 digest for ${IMAGE_REF}"
+              exit 1
+            fi
+            echo "Immutable Image Digest: ${DIGEST}"
             
             # Determine Active & Candidate Slots
             ACTIVE_COLOR="none"
@@ -115,27 +123,33 @@ jobs:
             echo "Active Slot: ${ACTIVE_COLOR} (Port ${ACTIVE_PORT})"
             echo "Candidate Slot: ${CANDIDATE_COLOR} (Port ${CANDIDATE_PORT})"
             
+            # Create safety NGINX backup if site file exists
+            if [ -f /etc/nginx/sites-available/app.devlalit.space ]; then
+              sudo cp /etc/nginx/sites-available/app.devlalit.space /etc/nginx/sites-available/app.devlalit.space.bak
+            fi
+            
             rollback() {
               echo "❌ DEPLOYMENT FAILED - EXECUTING AUTOMATIC ROLLBACK..."
               docker stop "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
               docker rm "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
               
-              if [ -f /etc/nginx/sites-available/app.devlalit.space ]; then
-                echo "Restoring proxy_pass to active port ${ACTIVE_PORT} in /etc/nginx/sites-available/app.devlalit.space..."
-                sudo sed -i -E "s|proxy_pass http://127\.0\.0\.1:[0-9]+;|proxy_pass http://127.0.0.1:${ACTIVE_PORT};|g" /etc/nginx/sites-available/app.devlalit.space
+              if [ -f /etc/nginx/sites-available/app.devlalit.space.bak ]; then
+                echo "Restoring NGINX site config backup..."
+                sudo cp /etc/nginx/sites-available/app.devlalit.space.bak /etc/nginx/sites-available/app.devlalit.space
               fi
               if [ -f /etc/nginx/conf.d/portfolio_upstream.conf ]; then
-                echo "Restoring Host NGINX to active port ${ACTIVE_PORT}..."
+                echo "Restoring Host NGINX upstream to port ${ACTIVE_PORT}..."
                 echo "upstream portfolio_backend { server 127.0.0.1:${ACTIVE_PORT}; }" | sudo tee /etc/nginx/conf.d/portfolio_upstream.conf > /dev/null
               fi
+              
               sudo nginx -t && (sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null) || true
               
               if [ "${ACTIVE_COLOR}" != "none" ]; then
-                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${ACTIVE_PORT}/" || echo "000")
-                if [ "$HTTP_CODE" -eq 200 ]; then
+                ACTIVE_CHECK=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${ACTIVE_PORT}/" || echo "000")
+                if [ "$ACTIVE_CHECK" -eq 200 ]; then
                   echo "✅ ROLLBACK SUCCESSFUL: Active container serving HTTP 200."
                 else
-                  echo "⚠️ ROLLBACK WARNING: Active container returned HTTP ${HTTP_CODE}"
+                  echo "⚠️ ROLLBACK WARNING: Active container returned HTTP ${ACTIVE_CHECK}"
                 fi
               fi
               exit 1
@@ -157,7 +171,7 @@ jobs:
               ST=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}starting{{end}}' "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || echo "starting")
               if [ "$ST" = "healthy" ]; then
                 HEALTH_OK=true
-                echo "Candidate Health: HEALTHY"
+                echo "Candidate Health Check: HEALTHY (attempt ${i}/12)"
                 break
               fi
               echo "Waiting for health... (${i}/12)"
@@ -177,12 +191,13 @@ jobs:
             
             echo "[5/6] Promoting Candidate Slot in Host NGINX..."
             if [ -f /etc/nginx/sites-available/app.devlalit.space ]; then
-              echo "Updating Host NGINX proxy_pass to port ${CANDIDATE_PORT} in app.devlalit.space..."
+              echo "Updating Host NGINX proxy_pass to port ${CANDIDATE_PORT}..."
               sudo sed -i -E "s|proxy_pass http://127\.0\.0\.1:[0-9]+;|proxy_pass http://127.0.0.1:${CANDIDATE_PORT};|g" /etc/nginx/sites-available/app.devlalit.space
             fi
             if [ -d /etc/nginx/conf.d ]; then
               echo "upstream portfolio_backend { server 127.0.0.1:${CANDIDATE_PORT}; }" | sudo tee /etc/nginx/conf.d/portfolio_upstream.conf > /dev/null
             fi
+            
             sudo nginx -t && (sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null) || rollback
             
             echo "[6/6] Verifying Production Endpoint & Decommissioning Old Container..."
@@ -192,15 +207,23 @@ jobs:
             fi
             
             if [ "${ACTIVE_COLOR}" = "blue" ] || [ "${ACTIVE_COLOR}" = "green" ]; then
+              echo "Decommissioning old container portfolio-ui-${ACTIVE_COLOR}..."
               docker stop "portfolio-ui-${ACTIVE_COLOR}" 2>/dev/null || true
               docker rm "portfolio-ui-${ACTIVE_COLOR}" 2>/dev/null || true
             elif [ "${ACTIVE_COLOR}" = "legacy" ]; then
+              echo "Decommissioning legacy container devops-portfolio-ui..."
               docker stop devops-portfolio-ui 2>/dev/null || true
               docker rm devops-portfolio-ui 2>/dev/null || true
             fi
             
+            # Clean up NGINX backup file
+            sudo rm -f /etc/nginx/sites-available/app.devlalit.space.bak
+            
             docker image prune -f || true
             echo "🎉 ZERO-DOWNTIME DEPLOYMENT PROMOTED SUCCESSFULLY!"
+            echo "Active Container: portfolio-ui-${CANDIDATE_COLOR}"
+            echo "Active Port: ${CANDIDATE_PORT}"
+            echo "Image Digest: ${DIGEST}"
 
       - name: Generate Deployment Job Summary
         if: always()
@@ -214,6 +237,7 @@ jobs:
           echo "| **Deployment Status** | \`${{ job.status }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Environment** | Production (\`https://app.devlalit.space\`) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Strategy** | Zero-Downtime Blue/Green Promotion |" >> $GITHUB_STEP_SUMMARY
+
 
 
 

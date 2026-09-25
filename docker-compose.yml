@@ -8,10 +8,11 @@ services:
     image: ghcr.io/lalitpunjabi/portfolio_lalitpunjabi:latest
     container_name: devops-portfolio-ui
     restart: unless-stopped
+    user: "101"
     ports:
       - "8080:8080" # Maps host port 8080 to container unprivileged port 8080
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
       interval: 30s
       timeout: 5s
       retries: 3
