@@ -84,13 +84,20 @@ echo ""
 echo "--- [4/6] Application HTTP & Health Endpoint Verification ---"
 HEALTH_HTTP=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${ACTIVE_PORT}/health" 2>/dev/null || echo "000")
 INDEX_HTTP=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${ACTIVE_PORT}/" 2>/dev/null || echo "000")
+PUBLIC_HTTPS=$(curl -s -k -o /dev/null -w "%{http_code}" "https://app.devlalit.space/" 2>/dev/null || echo "000")
 
 echo "Internal /health HTTP Code: ${HEALTH_HTTP}"
 echo "Internal SPA root / HTTP Code: ${INDEX_HTTP}"
+echo "Public HTTPS (https://app.devlalit.space/) Code: ${PUBLIC_HTTPS}"
 
 if [ "${HEALTH_HTTP}" -ne 200 ] || [ "${INDEX_HTTP}" -ne 200 ]; then
   echo "❌ CRITICAL: Application HTTP checks failed (Health: ${HEALTH_HTTP}, Root: ${INDEX_HTTP})"
   EXIT_CODE=1
+fi
+if [ "${PUBLIC_HTTPS}" -eq 200 ]; then
+  echo "✅ Public HTTPS Endpoint (https://app.devlalit.space/) responded HTTP 200 OK"
+else
+  echo "⚠️ Public HTTPS Check: Returned ${PUBLIC_HTTPS} (May require DNS/network reachability)"
 fi
 
 # --- 5. NGINX Process & Configuration Status ---

@@ -1,24 +1,17 @@
-name: Kubernetes Deployment Pipeline
+name: Kubernetes Manifest Validation (Optional Demo)
 
 on:
-  workflow_run:
-    workflows: ["Docker Image Automation (GHCR)"]
-    types:
-      - completed
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'Docker image tag to deploy (e.g., sha-abcdef1 or latest)'
-        required: true
-        default: 'latest'
+        description: 'Docker image tag to deploy (e.g., sha-abcdef1)'
+        required: false
+        default: ''
 
 jobs:
   deploy-k8s:
     name: Deploy to Kubernetes Cluster
     # Run only if the GHCR image was successfully built and published
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     environment:
       name: production

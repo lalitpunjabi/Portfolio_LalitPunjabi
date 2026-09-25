@@ -58,28 +58,26 @@ graph TD
 
 ## 🔄 Enterprise DevSecOps CI/CD Pipeline
 
-This project features a fully automated, production-grade GitHub Actions CI/CD architecture designed to ensure code quality, security, and seamless deployments.
+This project features a fully automated, production-grade GitHub Actions CI/CD architecture designed to ensure code quality, supply-chain security, and zero-downtime deployments.
 
 *   **Continuous Integration (`ci.yml`)**: 
-    *   Runs parallel Matrix Testing on Node.js 18 and 20.
-    *   Enforces strict TypeScript type-checking and dependency integrity checks.
-    *   Verifies production builds and securely passes artifacts downstream.
+    *   Enforces strict TypeScript type-checking (`tsc --noEmit`), ESLint code quality rules, and Vitest component testing.
+    *   Verifies production bundle generation with deterministic `npm ci` lockfile installation.
 *   **DevSecOps Scanning (`security.yml`)**: 
-    *   Runs Aqua Security's **Trivy** to scan Docker images and local filesystems.
-    *   Automatically blocks deployments if `HIGH` or `CRITICAL` vulnerabilities or exposed secrets are detected.
-*   **Docker Image Automation (`docker-publish.yml`)**: 
-    *   Automatically builds and publishes the optimized Docker image to the GitHub Container Registry (GHCR).
-    *   Implements multi-tagging (`latest`, short SHA, and semantic versions).
+    *   Runs Aqua Security's **Trivy** scanner on Docker images and local filesystems.
+    *   Blocks deployments on `HIGH` or `CRITICAL` vulnerabilities or exposed secrets.
+*   **Docker Automation & Supply-Chain Attestation (`docker-publish.yml`)**: 
+    *   Builds and pushes unprivileged OCI-compliant Docker images to GitHub Container Registry (GHCR).
+    *   Generates automated **Software Bill of Materials (SBOM)** and **SLSA Build Provenance** attestations (`sbom: true`, `provenance: mode=max`).
+    *   Implements immutable SHA tagging (`sha-<short-sha>`).
 *   **AWS EC2 Continuous Deployment (`cd-vps.yml`)**: 
-    *   Triggered automatically on `push` to the `main` branch.
-    *   Builds the production Docker image, pushes to GHCR, and authenticates via SSH key to the AWS EC2 instance using GitHub Environment Secrets (`Production` environment: `VPS_HOST`, `VPS_USERNAME`, `VPS_SSH_KEY`).
-    *   Restarts the container on port `8080`, proxied by Host NGINX with Let's Encrypt SSL on `app.devlalit.space`.
-*   **Environment-Based Deployments (`cd-aws.yml`)**: 
-    *   Deploys static artifacts to AWS S3 + CloudFront using strict GitHub Environments (`production`) for manual approval gating.
-*   **Release Automation (`release.yml`)**: 
-    *   Automatically generates GitHub Releases and rich changelogs based on semantic tags.
-*   **Kubernetes Automation (`cd-k8s.yml`)**:
-    *   Dynamically injects the new image SHA into K8s manifests and validates structural integrity before live cluster rollouts.
+    *   Triggered on `main` branch push following successful Docker build.
+    *   Authenticates via **AWS OIDC** (`id-token: write`, `environment: Production`) and SSH key (`VPS_HOST`, `VPS_SSH_KEY`).
+    *   Deploys using **Zero-Downtime Blue/Green Promotion** with host NGINX syntax validation (`sudo nginx -t`) and automatic rollback.
+*   **Optional S3 Static Demo (`cd-aws.yml`)**: 
+    *   Optional `workflow_dispatch` pipeline for static S3 bucket deployment.
+*   **Optional K8s Manifest Validation (`cd-k8s.yml`)**:
+    *   Optional `workflow_dispatch` workflow for Kubernetes manifest validation using `kubeconform`.
 
 ---
 
@@ -270,6 +268,114 @@ To manually initiate a rollback on EC2, run:
 ```bash
 bash scripts/rollback-production.sh
 ```
+
+---
+
+## 🛠️ Disaster Recovery Runbook
+
+### Scenario A: Docker Container Failure
+* **Detection**: Container healthcheck fails or HTTP 502 Bad Gateway observed on `https://app.devlalit.space`.
+* **Immediate Action**: Run `bash scripts/production-health-check.sh` on EC2 host to diagnose active slot.
+* **Recovery Command**:
+  ```bash
+  # Restart the failed active container
+  docker restart portfolio-ui-blue  # or portfolio-ui-green
+  ```
+* **Validation**: Run `curl -i http://127.0.0.1:8080/health` or `http://127.0.0.1:8081/health`.
+
+### Scenario B: Failed Production Deployment
+* **Detection**: GitHub Actions workflow fails during candidate launch, NGINX test, or public verification.
+* **Immediate Action**: Workflow automatically triggers `rollback()` logic. No live traffic interruption occurs.
+* **Recovery Command**:
+  ```bash
+  # If manual recovery required on EC2:
+  bash scripts/rollback-production.sh
+  ```
+* **Validation**: Verify live application via `curl -I https://app.devlalit.space/`.
+
+### Scenario C: EC2 Reboot / Host Restart
+* **Detection**: EC2 host rebooted due to kernel updates or AWS maintenance.
+* **Immediate Action**: Docker daemon starts automatically (`systemctl enable docker`). Active container auto-restarts via `--restart unless-stopped`.
+* **Recovery Command**:
+  ```bash
+  sudo systemctl restart docker nginx
+  ```
+* **Validation**: Confirm NGINX and Docker processes: `sudo systemctl status docker nginx`.
+
+### Scenario D: EC2 Docker Service Failure
+* **Detection**: `docker ps` returns connection error: `Cannot connect to the Docker daemon`.
+* **Immediate Action**: Check systemd service status.
+* **Recovery Command**:
+  ```bash
+  sudo systemctl status docker
+  sudo systemctl restart docker
+  ```
+* **Validation**: Run `docker ps` to list active containers.
+
+### Scenario E: Corrupted Deployment State File
+* **Detection**: Deployment script fails to detect active slot or `/opt/portfolio/deployment-state.json` is malformed.
+* **Immediate Action**: Manually inspect active container via `docker ps`.
+* **Recovery Command**:
+  ```bash
+  # Re-create deployment state file manually
+  echo '{"active_slot":"blue","active_port":"8080"}' | sudo tee /opt/portfolio/deployment-state.json
+  ```
+* **Validation**: Run `bash scripts/production-health-check.sh`.
+
+### Scenario F: Complete EC2 Instance Replacement
+* **Detection**: EC2 instance terminated or unrecoverable system failure.
+* **Immediate Action**: Provision new EC2 Ubuntu 24.04 instance, re-attach Elastic IP.
+* **Recovery Command**:
+  ```bash
+  # 1. Install prerequisites
+  sudo apt update && sudo apt install -y docker.io nginx certbot python3-certbot-nginx
+  sudo systemctl enable --now docker nginx
+  sudo usermod -aG docker ubuntu
+  
+  # 2. Configure NGINX reverse proxy & TLS
+  sudo certbot --nginx -d app.devlalit.space
+  
+  # 3. Pull latest immutable image tag from GHCR
+  docker pull ghcr.io/lalitpunjabi/portfolio_lalitpunjabi:latest
+  docker run -d --name portfolio-ui-blue --restart unless-stopped -p 8080:8080 ghcr.io/lalitpunjabi/portfolio_lalitpunjabi:latest
+  ```
+* **Validation**: Access `https://app.devlalit.space/` in browser.
+
+### Scenario G: GHCR Registry Temporary Unavailability
+* **Detection**: `docker pull ghcr.io/...` fails during deployment with HTTP 503/504 or network timeout.
+* **Immediate Action**: Deployment workflow catches image pull failure and aborts *before* altering running containers.
+* **Recovery Command**: Active container remains 100% online. Re-trigger workflow once GHCR status is operational.
+* **Validation**: Check GitHub Status / GHCR service availability.
+
+---
+
+## 📊 Operations & Observability Guide
+
+### Docker Daemon Log Rotation Policy (`/etc/docker/daemon.json`)
+To prevent container log files from consuming host disk space, configure Docker daemon log limits on EC2:
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+```
+Apply via: `sudo systemctl reload docker`.
+
+### Operational Commands Reference
+
+| Purpose | Safe Command |
+| :--- | :--- |
+| **System Diagnostic** | `bash scripts/production-health-check.sh` |
+| **Manual Rollback** | `bash scripts/rollback-production.sh` |
+| **Inspect Active Container** | `docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'` |
+| **Container Traceability** | `docker inspect --format='{{index .Config.Labels "org.opencontainers.image.title"}}' portfolio-ui-blue` |
+| **Host NGINX Test** | `sudo nginx -t` |
+| **Host NGINX Reload** | `sudo systemctl reload nginx` |
+| **Safe Image Pruning** | `docker image prune -f` *(Preserves active & tagged images)* |
 
 ---
 

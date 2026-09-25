@@ -1,4 +1,4 @@
-name: Continuous Deployment (AWS)
+name: Continuous Deployment (AWS S3 Optional Demo)
 
 on:
   workflow_dispatch:

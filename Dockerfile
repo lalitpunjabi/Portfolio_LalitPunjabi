@@ -23,6 +23,12 @@ USER root
 RUN apk upgrade --no-cache libexpat
 USER 101
 
+# Container Traceability OCI Labels
+LABEL org.opencontainers.image.title="Portfolio Lalit Punjabi" \
+      org.opencontainers.image.description="Production unprivileged NGINX web application for Lalit Punjabi" \
+      org.opencontainers.image.vendor="Lalit Punjabi" \
+      org.opencontainers.image.source="https://github.com/lalitpunjabi/Portfolio_LalitPunjabi"
+
 # Copy custom NGINX SPA configuration
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 

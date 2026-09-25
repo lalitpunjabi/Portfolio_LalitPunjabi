@@ -228,15 +228,16 @@ jobs:
       - name: Generate Deployment Job Summary
         if: always()
         run: |
-          echo "## 🚀 Production Deployment Observability Report" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Production Deployment & Traceability Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Commit SHA** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Image Tag** | \`${{ env.TARGET_TAG }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Registry** | \`ghcr.io/lalitpunjabi/portfolio_lalitpunjabi\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Deployment Status** | \`${{ job.status }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Environment** | Production (\`https://app.devlalit.space\`) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Strategy** | Zero-Downtime Blue/Green Promotion |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Git Commit SHA** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Target Image Tag** | \`${{ env.TARGET_TAG }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Container Registry** | \`ghcr.io/${{ github.repository }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployment Environment** | Production (\`https://app.devlalit.space\`) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployment Strategy** | Zero-Downtime Blue/Green Promotion |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployment Trigger** | \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Execution Result** | \`${{ job.status }}\` |" >> $GITHUB_STEP_SUMMARY
 
 
 
