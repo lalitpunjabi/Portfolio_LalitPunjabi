@@ -118,11 +118,15 @@ jobs:
               docker stop "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
               docker rm "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
               
+              if [ -f /etc/nginx/sites-available/app.devlalit.space ]; then
+                echo "Restoring proxy_pass to active port ${ACTIVE_PORT} in /etc/nginx/sites-available/app.devlalit.space..."
+                sudo sed -i -E "s|proxy_pass http://127\.0\.0\.1:[0-9]+;|proxy_pass http://127.0.0.1:${ACTIVE_PORT};|g" /etc/nginx/sites-available/app.devlalit.space
+              fi
               if [ -f /etc/nginx/conf.d/portfolio_upstream.conf ]; then
                 echo "Restoring Host NGINX to active port ${ACTIVE_PORT}..."
                 echo "upstream portfolio_backend { server 127.0.0.1:${ACTIVE_PORT}; }" | sudo tee /etc/nginx/conf.d/portfolio_upstream.conf > /dev/null
-                sudo nginx -t && (sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null) || true
               fi
+              sudo nginx -t && (sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null) || true
               
               if [ "${ACTIVE_COLOR}" != "none" ]; then
                 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${ACTIVE_PORT}/" || echo "000")
@@ -170,10 +174,14 @@ jobs:
             fi
             
             echo "[5/6] Promoting Candidate Slot in Host NGINX..."
+            if [ -f /etc/nginx/sites-available/app.devlalit.space ]; then
+              echo "Updating Host NGINX proxy_pass to port ${CANDIDATE_PORT} in app.devlalit.space..."
+              sudo sed -i -E "s|proxy_pass http://127\.0\.0\.1:[0-9]+;|proxy_pass http://127.0.0.1:${CANDIDATE_PORT};|g" /etc/nginx/sites-available/app.devlalit.space
+            fi
             if [ -d /etc/nginx/conf.d ]; then
               echo "upstream portfolio_backend { server 127.0.0.1:${CANDIDATE_PORT}; }" | sudo tee /etc/nginx/conf.d/portfolio_upstream.conf > /dev/null
-              sudo nginx -t && (sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null) || rollback
             fi
+            sudo nginx -t && (sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null) || rollback
             
             echo "[6/6] Verifying Production Endpoint & Decommissioning Old Container..."
             P_HTTP=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${CANDIDATE_PORT}/" || echo "000")
