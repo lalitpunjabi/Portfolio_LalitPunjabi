@@ -101,9 +101,16 @@ rollback_deployment() {
 trap 'rollback_deployment "Script execution interrupted or unexpected error occurred"' ERR
 
 # --- Step 4: Prepare & Launch Candidate Container ---
-echo "[4/7] Cleaning candidate container slot..."
+echo "[4/7] Cleaning candidate container slot and freeing port ${CANDIDATE_PORT}..."
+STALE_PORT_CONTAINERS=$(docker ps -a --filter "publish=${CANDIDATE_PORT}" --format '{{.ID}}' 2>/dev/null || echo "")
+if [ -n "${STALE_PORT_CONTAINERS}" ]; then
+  echo "Freeing port ${CANDIDATE_PORT} from stale container(s)..."
+  docker stop ${STALE_PORT_CONTAINERS} 2>/dev/null || true
+  docker rm -f ${STALE_PORT_CONTAINERS} 2>/dev/null || true
+fi
+
 docker stop "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
-docker rm "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
+docker rm -f "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
 
 echo "Launching candidate container portfolio-ui-${CANDIDATE_COLOR} on port ${CANDIDATE_PORT}..."
 docker run -d \

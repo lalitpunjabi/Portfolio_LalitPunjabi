@@ -156,8 +156,16 @@ jobs:
             }
             
             echo "[3/6] Launching Candidate Slot (portfolio-ui-${CANDIDATE_COLOR} on :${CANDIDATE_PORT})..."
+            # Free candidate port from any stale containers
+            STALE_PORT_CONTAINERS=$(docker ps -a --filter "publish=${CANDIDATE_PORT}" --format '{{.ID}}' 2>/dev/null || echo "")
+            if [ -n "${STALE_PORT_CONTAINERS}" ]; then
+              echo "Freeing port ${CANDIDATE_PORT} from stale container(s)..."
+              docker stop ${STALE_PORT_CONTAINERS} 2>/dev/null || true
+              docker rm -f ${STALE_PORT_CONTAINERS} 2>/dev/null || true
+            fi
+            
             docker stop "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
-            docker rm "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
+            docker rm -f "portfolio-ui-${CANDIDATE_COLOR}" 2>/dev/null || true
             
             docker run -d \
               --name "portfolio-ui-${CANDIDATE_COLOR}" \
