@@ -31,7 +31,7 @@ jobs:
         run: docker build -t app-to-scan:latest .
 
       - name: Run Trivy Container Image Scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'image'
           image-ref: 'app-to-scan:latest'
@@ -42,7 +42,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Run Trivy Filesystem & Secret Scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'

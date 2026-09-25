@@ -31,7 +31,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci && npm install --no-save @rollup/rollup-linux-x64-gnu
 
       - name: Code Quality & Type Check
         run: |
